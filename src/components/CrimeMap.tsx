@@ -114,7 +114,7 @@ export default function CrimeMap() {
         map = new maplibregl.Map({
             container: mapContainer!,
             center: [-0.1278, 51.5074], // London
-            zoom: 15,
+            zoom: 14,
             style: {
                 version: 8,
                 sources: {
