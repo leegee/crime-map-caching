@@ -4,6 +4,8 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { fetchCrimesByBBox } from "../lib/fetch";
 
+const crimeCategory = 'rape';
+
 type Crime = {
     category: string;
     outcome_status?: { category: string };
@@ -32,7 +34,7 @@ export default function CrimeMap() {
 
     async function updateCrimesInBBox(bbox: [number, number, number, number], date: string) {
         try {
-            const crimes: Crime[] = await fetchCrimesByBBox(bbox, date);
+            const crimes: Crime[] = await fetchCrimesByBBox(bbox, date, crimeCategory);
 
             if (!crimes.length) {
                 console.warn("No crime data for this bbox/date");
@@ -149,19 +151,17 @@ export default function CrimeMap() {
         const month = String(latestMonth.getMonth() + 1).padStart(2, "0");
         const date = `${year}-${month}`;
 
-        // Initial fetch for viewport
         const bounds = map.getBounds();
         updateCrimesInBBox(
             [bounds.getSouthWest().lng, bounds.getSouthWest().lat, bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-            date
+            date,
         );
 
-        // Fetch on viewport change (zoom/pan)
         map.on("moveend", () => {
             const bounds = map.getBounds();
             updateCrimesInBBox(
                 [bounds.getSouthWest().lng, bounds.getSouthWest().lat, bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-                date
+                date,
             );
         });
     });
