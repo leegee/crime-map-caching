@@ -2,6 +2,15 @@ import type { Crime } from "./types";
 
 const MAX_REQUESTS_PER_SECOND = 10;
 
+type TileKey = string;
+
+interface CachedTile {
+    crimes: Crime[];
+    date: string; // month, e.g., '2025-06'
+}
+
+const crimeCache = new Map<TileKey, CachedTile>();
+
 // Divide a bbox into a tile grid of n x n
 function splitBBox(
     sw: [number, number],
@@ -29,24 +38,30 @@ function splitBBox(
     return boxes;
 }
 
+function tileKey(sw: [number, number], ne: [number, number], category: string) {
+    return `${sw[0]},${sw[1]}:${ne[0]},${ne[1]}:${category}`;
+}
 
+async function fetchCrimesByBBoxCached(
+    sw: [number, number],
+    ne: [number, number],
+    date: string,
+    category: string = 'burglary'
+): Promise<Crime[]> {
+    const key = tileKey(sw, ne, category);
+    const cached = crimeCache.get(key);
 
-/**
- * Fetch crimes from Police.uk API within a bounding box (polygon), for a given category and month.
- * @param sw South-west coordinate [lat, lng]
- * @param ne North-east coordinate [lat, lng]
- * @param date YYYY-MM string (past month)
- * @param category crime category (e.g., 'all-crime', 'rape')
- * @example
- 
-    const crimes = await fetchCrimesByBBox(
-        [bounds.getSouth(), bounds.getWest()],
-        [bounds.getNorth(), bounds.getEast()],
-        date,
-        'rape'
-    );
+    // Return cached tile if month matches
+    if (cached && cached.date === date) {
+        return cached.crimes;
+    }
 
- */
+    const crimes = await fetchCrimesByBBox(sw, ne, date, category);
+
+    crimeCache.set(key, { crimes, date });
+    return crimes;
+}
+
 export async function fetchCrimesByBBox(
     sw: [number, number],
     ne: [number, number],
@@ -76,6 +91,9 @@ export async function fetchCrimesByBBox(
     }
 }
 
+/**
+ * Fetch crimes using tiled requests with caching and deduplication
+ */
 export async function fetchCrimesTiled(
     sw: [number, number],
     ne: [number, number],
@@ -91,20 +109,31 @@ export async function fetchCrimesTiled(
 
     const tiles = splitBBox(sw, ne, rows, cols);
     const allCrimes: Crime[] = [];
+    const seen = new Set<string>();
 
     for (let i = 0; i < tiles.length; i += MAX_REQUESTS_PER_SECOND) {
         const batch = tiles.slice(i, i + MAX_REQUESTS_PER_SECOND);
 
         const batchResults = await Promise.all(
             batch.map(([sLat, sLng, nLat, nLng]) =>
-                fetchCrimesByBBox([sLat, sLng], [nLat, nLng], date, category).catch((err) => {
-                    console.error("Tile fetch error:", err);
-                    return [] as Crime[];
-                })
+                fetchCrimesByBBoxCached([sLat, sLng], [nLat, nLng], date, category)
+                    .catch((err) => {
+                        console.error("Tile fetch error:", err);
+                        return [] as Crime[];
+                    })
             )
         );
 
-        batchResults.forEach((crimes) => allCrimes.push(...crimes));
+        // Merge results with deduplication
+        batchResults.forEach((crimes) => {
+            crimes.forEach((crime) => {
+                const id = `${crime.location.latitude},${crime.location.longitude},${crime.month}`;
+                if (!seen.has(id)) {
+                    seen.add(id);
+                    allCrimes.push(crime);
+                }
+            });
+        });
 
         if (i + MAX_REQUESTS_PER_SECOND < tiles.length) {
             await new Promise((r) => setTimeout(r, 1000));
