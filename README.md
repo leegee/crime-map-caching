@@ -4,25 +4,37 @@
 $ npm install # or pnpm install or yarn install
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
 
-## Available Scripts
+Full list of valid categories per Police UK API:
 
-In the project directory, you can run:
+anti-social-behaviour
 
-### `npm run dev`
+bicycle-theft
 
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
+burglary
 
-### `npm run build`
+criminal-damage-arson
 
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
+drugs
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+other-theft
 
-## Deployment
+possession-of-weapons
 
-Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)
+public-order
+
+robbery
+
+shoplifting
+
+theft-from-the-person
+
+vehicle-crime
+
+violent-crime
+
+sexual-offences
+
+rape
+
+Note: The API docs say “rape” is a subcategory of sexual offences, but it has its own endpoint.
