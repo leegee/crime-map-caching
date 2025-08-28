@@ -1,30 +1,16 @@
-// src/components/CrimeMap.tsx
+
 import { onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
 import { fetchCrimesByBBox } from "../lib/fetch";
 
-const crimeCategory = 'rape';
-
-type Crime = {
-    category: string;
-    outcome_status?: { category: string };
-    location: { latitude: string; longitude: string };
-    month: string;
-};
-
-type CrimeProperties = {
-    category: string;
-    outcome: string;
-    month: string;
-};
-
-type CrimeFeature = GeoJSON.Feature<GeoJSON.Point, CrimeProperties>;
+const crimeCategory = 'violent-crime';
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
 
-    const crimeGeoJSON: GeoJSON.FeatureCollection<GeoJSON.Point, CrimeProperties> = {
+    const crimeGeoJSON: CrimeFeatureCollection = {
         type: "FeatureCollection",
         features: [],
     };
@@ -32,9 +18,14 @@ export default function CrimeMap() {
     let map: maplibregl.Map;
     let lastQueryDate: string | null = null;
 
-    async function updateCrimesInBBox(bbox: [number, number, number, number], date: string) {
+    async function updateDataInBounds(bounds: maplibregl.LngLatBounds, date: string) {
         try {
-            const crimes: Crime[] = await fetchCrimesByBBox(bbox, date, crimeCategory);
+            const crimes = await fetchCrimesByBBox(
+                [bounds.getSouth(), bounds.getWest()],
+                [bounds.getNorth(), bounds.getEast()],
+                date,
+                crimeCategory
+            );
 
             if (!crimes.length) {
                 console.warn("No crime data for this bbox/date");
@@ -64,13 +55,13 @@ export default function CrimeMap() {
             }));
 
             crimeGeoJSON.features.push(...newFeatures);
-            renderCrimes();
+            renderGeoJson();
         } catch (err) {
             console.error("Error fetching crimes:", err);
         }
     }
 
-    function renderCrimes() {
+    function renderGeoJson() {
         if (!map) return;
         if (map.getSource("crimes")) {
             (map.getSource("crimes") as maplibregl.GeoJSONSource).setData(crimeGeoJSON);
@@ -87,8 +78,6 @@ export default function CrimeMap() {
                         ["get", "category"],
                         "violent-crime",
                         "#ff0000",
-                        "sexual-offences",
-                        "#ff69b4",
                         "robbery",
                         "#ffa500",
                         "#888",
@@ -102,9 +91,11 @@ export default function CrimeMap() {
                 new maplibregl.Popup()
                     .setLngLat(coordinates as [number, number])
                     .setHTML(`
-            <strong>${feature.properties.category}</strong><br/>
-            Outcome: ${feature.properties.outcome}<br/>
-            Month: ${feature.properties.month}
+            <div style="color: black; background: oldlace;">
+                <p><strong>${feature.properties.category}</strong></p>
+                <p>Outcome: ${feature.properties.outcome}</p>
+                <p>Month: ${feature.properties.month}</p>
+            </div>
           `)
                     .addTo(map);
             });
@@ -115,7 +106,7 @@ export default function CrimeMap() {
         map = new maplibregl.Map({
             container: mapContainer!,
             center: [-0.1278, 51.5074], // London
-            zoom: 12,
+            zoom: 15,
             style: {
                 version: 8,
                 sources: {
@@ -146,24 +137,14 @@ export default function CrimeMap() {
         });
 
         const now = new Date();
-        const latestMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const latestMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1);
         const year = latestMonth.getFullYear();
         const month = String(latestMonth.getMonth() + 1).padStart(2, "0");
         const date = `${year}-${month}`;
 
-        const bounds = map.getBounds();
-        updateCrimesInBBox(
-            [bounds.getSouthWest().lng, bounds.getSouthWest().lat, bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-            date,
-        );
+        updateDataInBounds(map.getBounds(), date,);
 
-        map.on("moveend", () => {
-            const bounds = map.getBounds();
-            updateCrimesInBBox(
-                [bounds.getSouthWest().lng, bounds.getSouthWest().lat, bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-                date,
-            );
-        });
+        map.on("moveend", () => updateDataInBounds(map.getBounds(), date,));
     });
 
     return <div ref={mapContainer} style="width:100vw;height:100vh;"></div>;
