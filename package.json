@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/maplibre-gl": "^1.14.0",
+    "debounce": "^2.2.0",
     "maplibre-gl": "^5.7.0",
     "solid-js": "^1.9.8"
   },

@@ -3,7 +3,7 @@ import { onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
-import { fetchCrimesByBBox } from "../lib/fetch";
+import { fetchCrimesByBBox, fetchCrimesTiled } from "../lib/fetch";
 
 const crimeCategory = 'violent-crime';
 const now = new Date();
@@ -24,7 +24,6 @@ export default function CrimeMap() {
     let lastQueryDate: string | null = null;
 
     async function updateDataInBounds() {
-
         const bounds = map.getBounds();
 
         try {
@@ -67,6 +66,43 @@ export default function CrimeMap() {
         } catch (err) {
             console.error("Error fetching crimes:", err);
         }
+    }
+
+    async function updateDataInBounds2() {
+        if (lastQueryDate !== date) {
+            crimeGeoJSON.features = [];
+            lastQueryDate = date;
+        }
+
+        const boundsArray = map.getBounds().toArray();
+        const sw: [number, number] = [boundsArray[0][1], boundsArray[0][0]];
+        const ne: [number, number] = [boundsArray[1][1], boundsArray[1][0]];
+
+        const crimes = await fetchCrimesTiled(sw, ne, date, map.getZoom(), crimeCategory);
+
+        if (!crimes.length) {
+            console.warn("No crime data for this bbox/date");
+            return;
+        }
+
+        const newFeatures: CrimeFeature[] = crimes.map((crime) => ({
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [
+                    parseFloat(crime.location.longitude),
+                    parseFloat(crime.location.latitude),
+                ],
+            },
+            properties: {
+                category: crime.category,
+                outcome: crime.outcome_status?.category || "Unknown",
+                month: crime.month,
+            },
+        }));
+
+        crimeGeoJSON.features.push(...newFeatures);
+        renderGeoJson();
     }
 
     function renderGeoJson() {
@@ -144,9 +180,11 @@ export default function CrimeMap() {
             attributionControl: false,
         });
 
-        map.on('load', updateDataInBounds);
+        // map.on('load', updateDataInBounds);
+        // map.on("moveend", updateDataInBounds);
 
-        map.on("moveend", updateDataInBounds);
+        map.on("load", updateDataInBounds2);
+        map.on("moveend", updateDataInBounds2);
     });
 
     return <div ref={mapContainer} style="width:100vw;height:100vh;"></div>;
