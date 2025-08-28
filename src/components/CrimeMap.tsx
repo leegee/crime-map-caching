@@ -18,7 +18,10 @@ export default function CrimeMap() {
     let map: maplibregl.Map;
     let lastQueryDate: string | null = null;
 
-    async function updateDataInBounds(bounds: maplibregl.LngLatBounds, date: string) {
+    async function updateDataInBounds() {
+
+        const bounds = map.getBounds();
+
         try {
             const crimes = await fetchCrimesByBBox(
                 [bounds.getSouth(), bounds.getWest()],
@@ -142,9 +145,9 @@ export default function CrimeMap() {
         const month = String(latestMonth.getMonth() + 1).padStart(2, "0");
         const date = `${year}-${month}`;
 
-        updateDataInBounds(map.getBounds(), date,);
+        map.on('load', updateDataInBounds);
 
-        map.on("moveend", () => updateDataInBounds(map.getBounds(), date,));
+        map.on("moveend", updateDataInBounds);
     });
 
     return <div ref={mapContainer} style="width:100vw;height:100vh;"></div>;
