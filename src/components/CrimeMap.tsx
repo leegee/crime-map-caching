@@ -6,6 +6,11 @@ import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
 import { fetchCrimesByBBox } from "../lib/fetch";
 
 const crimeCategory = 'violent-crime';
+const now = new Date();
+const latestMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+const year = latestMonth.getFullYear();
+const month = String(latestMonth.getMonth() + 1).padStart(2, "0");
+const date = `${year}-${month}`;
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
@@ -138,12 +143,6 @@ export default function CrimeMap() {
             },
             attributionControl: false,
         });
-
-        const now = new Date();
-        const latestMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-        const year = latestMonth.getFullYear();
-        const month = String(latestMonth.getMonth() + 1).padStart(2, "0");
-        const date = `${year}-${month}`;
 
         map.on('load', updateDataInBounds);
 
