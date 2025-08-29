@@ -3,7 +3,7 @@ import { onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
-import { /* fetchCrimesByBBox,*/ fetchCrimesTiled } from "../lib/fetch";
+import { fetchDataForViewport } from "../lib/fetch";
 
 const crimeCategory = 'violent-crime';
 const now = new Date();
@@ -23,87 +23,49 @@ export default function CrimeMap() {
     let map: maplibregl.Map;
     let lastQueryDate: string | null = null;
 
-    // async function updateDataInBounds() {
-    //     const bounds = map.getBounds();
+    async function updateDataInBounds() {
+        try {
+            const data = await fetchDataForViewport(
+                map.getBounds(),
+                // date,
+                // crimeCategory
+            );
 
-    //     try {
-    //         const crimes = await fetchCrimesByBBox(
-    //             [bounds.getSouth(), bounds.getWest()],
-    //             [bounds.getNorth(), bounds.getEast()],
-    //             date,
-    //             crimeCategory
-    //         );
+            if (!data || !data.length) {
+                console.warn("No crime data for this bbox/date");
+                return;
+            }
 
-    //         if (!crimes.length) {
-    //             console.warn("No crime data for this bbox/date");
-    //             return;
-    //         }
+            // Only clear features if the date changed
+            if (lastQueryDate !== date) {
+                crimeGeoJSON.features = [];
+                lastQueryDate = date;
+            }
 
-    //         // Only clear features if the date changed
-    //         if (lastQueryDate !== date) {
-    //             crimeGeoJSON.features = [];
-    //             lastQueryDate = date;
-    //         }
+            const newFeatures: CrimeFeature[] = data.map((crime) => ({
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [
+                        parseFloat(crime.location.longitude),
+                        parseFloat(crime.location.latitude),
+                    ],
+                },
+                properties: {
+                    category: crime.category,
+                    outcome: crime.outcome_status?.category || "Unknown",
+                    month: crime.month,
+                },
+            }));
 
-    //         const newFeatures: CrimeFeature[] = crimes.map((crime) => ({
-    //             type: "Feature",
-    //             geometry: {
-    //                 type: "Point",
-    //                 coordinates: [
-    //                     parseFloat(crime.location.longitude),
-    //                     parseFloat(crime.location.latitude),
-    //                 ],
-    //             },
-    //             properties: {
-    //                 category: crime.category,
-    //                 outcome: crime.outcome_status?.category || "Unknown",
-    //                 month: crime.month,
-    //             },
-    //         }));
-
-    //         crimeGeoJSON.features.push(...newFeatures);
-    //         renderGeoJson();
-    //     } catch (err) {
-    //         console.error("Error fetching crimes:", err);
-    //     }
-    // }
-
-    async function updateDataInBounds2() {
-        if (lastQueryDate !== date) {
-            crimeGeoJSON.features = [];
-            lastQueryDate = date;
+            crimeGeoJSON.features.push(...newFeatures);
+            renderGeoJson();
+        } catch (err) {
+            console.error("Error fetching crimes:", err);
         }
-
-        const boundsArray = map.getBounds().toArray();
-        const sw: [number, number] = [boundsArray[0][1], boundsArray[0][0]];
-        const ne: [number, number] = [boundsArray[1][1], boundsArray[1][0]];
-
-        const crimes = await fetchCrimesTiled(sw, ne, date, map.getZoom(), crimeCategory);
-
-        if (!crimes.length) {
-            console.warn("No crime data for this bbox/date");
-            return;
-        }
-
-        const newFeatures: CrimeFeature[] = crimes.map((crime) => ({
-            type: "Feature",
-            geometry: {
-                type: "Point",
-                coordinates: [
-                    parseFloat(crime.location.longitude),
-                    parseFloat(crime.location.latitude),
-                ],
-            },
-            properties: {
-                category: crime.category,
-                outcome: crime.outcome_status?.category || "Unknown",
-                month: crime.month,
-            },
-        }));
-
-        crimeGeoJSON.features.push(...newFeatures);
-        renderGeoJson();
     }
+
+
 
     function renderGeoJson() {
         if (!map) return;
@@ -180,11 +142,8 @@ export default function CrimeMap() {
             attributionControl: false,
         });
 
-        // map.on('load', updateDataInBounds);
-        // map.on("moveend", updateDataInBounds);
-
-        map.on("load", updateDataInBounds2);
-        map.on("moveend", updateDataInBounds2);
+        map.on('load', updateDataInBounds);
+        map.on("moveend", updateDataInBounds);
     });
 
     return <div ref={mapContainer} style="width:100vw;height:100vh;"></div>;
