@@ -3,18 +3,20 @@ import { createEffect, onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
+import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { setState, state } from "../store/api-ui";
 import { crimeCategories } from "../lib/categories";
 
-const circleColorExpression: any[] = ["match", ["get", "category"]];
-
-for (const [key, { colour }] of Object.entries(crimeCategories)) {
-    circleColorExpression.push(key, colour);
-}
-
-circleColorExpression.push("rgb(128,128,128)");
+const circleColorExpression = ([
+    "match",
+    ["get", "category"],
+    ...Object.entries(crimeCategories).reduce<(string | string)[]>((acc, [key, { colour }]) => {
+        acc.push(key, colour);
+        return acc;
+    }, []),
+    "rgb(128,128,128)", // fallback
+] as unknown) as any; // auch aye
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
