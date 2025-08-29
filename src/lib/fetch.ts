@@ -35,11 +35,16 @@ async function fetchData(
     }
 }
 
+/*
+ * Latitude: 5 miles ≈ 5 / 69 ≈ 0.072°
+ * Longitude: 5 miles ≈ 5 / 43 ≈ 0.116°
+*/
+
 const tileCache = new TileCache({
     minLon: -180,
     minLat: -90,
-    tileWidth: 0.125, // wip
-    tileHeight: 0.125,
+    tileWidth: 0.125,  // ~5 miles longitude in London
+    tileHeight: 0.072, // ~5 miles latitude
 });
 
 const formatDateForUrl = (date: Date): string => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
