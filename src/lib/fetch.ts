@@ -38,8 +38,8 @@ async function fetchData(
 const tileCache = new TileCache({
     minLon: -180,
     minLat: -90,
-    tileWidth: 0.25,
-    tileHeight: 0.25,
+    tileWidth: 0.125, // wip
+    tileHeight: 0.125,
 });
 
 const formatDateForUrl = (date: Date): string => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
