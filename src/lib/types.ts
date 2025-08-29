@@ -1,4 +1,8 @@
 import type { GeoJsonProperties, Point, FeatureCollection, Feature } from "geojson";
+import { crimeCategories } from "./categories";
+
+export const CRIME_CATEGORIES = Object.keys(crimeCategories) as Array<keyof typeof crimeCategories>;
+export type CrimeCategory = typeof CRIME_CATEGORIES[number];
 
 export type Crime = {
     id: string;

@@ -1,13 +1,5 @@
 import { createStore } from "solid-js/store";
-
-export const CRIME_CATEGORIES = [
-    "violent-crime",
-    "burglary",
-    "robbery",
-    "anti-social-behaviour",
-] as const;
-
-export type CrimeCategory = typeof CRIME_CATEGORIES[number];
+import type { CrimeCategory } from "../lib/types";
 
 type StoreState = {
     date: Date;

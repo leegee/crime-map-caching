@@ -1,4 +1,5 @@
-import { CRIME_CATEGORIES, setState, state } from "../../store/api-ui";
+import { CRIME_CATEGORIES } from "../../lib/types";
+import { setState, state } from "../../store/api-ui";
 
 export default function Category() {
     return (

@@ -5,7 +5,16 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
-import { setState, state, type CrimeCategory } from "../store/api-ui";
+import { setState, state } from "../store/api-ui";
+import { crimeCategories } from "../lib/categories";
+
+const circleColorExpression: any[] = ["match", ["get", "category"]];
+
+for (const [key, { colour }] of Object.entries(crimeCategories)) {
+    circleColorExpression.push(key, colour);
+}
+
+circleColorExpression.push("rgb(128,128,128)");
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
@@ -72,15 +81,7 @@ export default function CrimeMap() {
                 source: "crimes",
                 paint: {
                     "circle-radius": 5,
-                    "circle-color": [
-                        "match",
-                        ["get", "category"],
-                        "violent-crime",
-                        "#ff0000",
-                        "robbery",
-                        "#ffa500",
-                        "#888",
-                    ],
+                    "circle-color": circleColorExpression,
                 },
             });
 
