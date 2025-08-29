@@ -4,5 +4,5 @@ import packageJson from './package.json';
 
 export default defineConfig({
   plugins: [solid()],
-  base: `/${packageJson.name}}/`,
+  base: `/${packageJson.name}/`,
 })

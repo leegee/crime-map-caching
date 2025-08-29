@@ -1,16 +1,16 @@
 # A Map of UK Police Reported Crime 
 
-Accesses the [Police API](https://data.police.uk/docs/) in real time, with local caching out of respect to the API.
+[This app](https://leegee.github.io/crime-map-caching) accesses the [Police API](https://data.police.uk/docs/) in real time.
+
+Out of the respect to the tax payer-funded API
+[Rate limit](https://data.police.uk/docs/api-call-limits/),
+makes no more than 15 requests per second, and out of respect of the user caches a lot of data.
 
 ## Usage
-
-[Demo](https://leegee.github.io/crime-map-caching)
 
 ```bash
 bun install
 ```
-
-* Allows 15 concurrent addresses cf [Rate limit](https://data.police.uk/docs/api-call-limits/) of 15 requests per second with bursts of 30 per second
 
 ## Next
 
