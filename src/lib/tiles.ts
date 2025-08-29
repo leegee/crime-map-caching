@@ -4,8 +4,8 @@ type TileCoord = [number, number];
 interface TileGridOptions {
     minLon: number;
     minLat: number;
-    tileWidth: number;   // set to max server request width
-    tileHeight: number;  // set to max server request height
+    tileWidth: number;
+    tileHeight: number;
 }
 
 export class TileCache {
