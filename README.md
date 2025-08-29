@@ -15,9 +15,7 @@ bun install
 ## Next
 
 * Map data as it is received (event, store)
-* Add crime-type filter UI and date UI
-* Add date filter
-* Toggle clearing of data on filter changes
+* On zoom out, get data for layers not currently selected - maybe make the drop-down a checkbox list to show all selected?
 
 ## Notes
 

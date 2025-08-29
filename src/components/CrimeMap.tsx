@@ -1,3 +1,4 @@
+/* @refresh reset */
 
 import { createEffect, onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
