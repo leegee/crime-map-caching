@@ -1,4 +1,10 @@
+# A Map of UK Police Reported Crime 
+
+Accesses the [Police API](https://data.police.uk/docs/) in real time, with local caching out of respect to the API.
+
 ## Usage
+
+[Demo](https://leegee.github.io/crime-map-caching)
 
 ```bash
 bun install
@@ -10,6 +16,8 @@ bun install
 
 * Map data as it is received (event, store)
 * Add crime-type filter UI and date UI
+* Add date filter
+* Toggle clearing of data on filter changes
 
 ## Notes
 
