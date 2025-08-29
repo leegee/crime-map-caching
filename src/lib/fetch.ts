@@ -3,6 +3,8 @@ import { TileCache } from "./tiles";
 import type { Crime } from "./types";
 import { state } from "../store/api-ui";
 
+type CrimeCallback = (crimes: Crime[]) => void;
+
 const limit = pLimit(15); // max 15 concurrent requests
 
 async function fetchData(
@@ -52,7 +54,8 @@ const formatDateForUrl = (date: Date): string => `${date.getFullYear()}-${String
 export async function fetchDataForViewport(
     bounds: maplibregl.LngLatBounds,
     date: Date,
-    category: string = "burglary"
+    category: string = "violent-crime",
+    onTileData?: CrimeCallback,
 ): Promise<Crime[]> {
     const minLon = bounds.getWest();
     const minLat = bounds.getSouth();
@@ -72,11 +75,15 @@ export async function fetchDataForViewport(
 
             const crimes = await fetchData(sw, ne, date, category);
             tileCache.markTileLoaded(category, date, tileX, tileY);
+
+            if (onTileData && crimes.length) {
+                onTileData(crimes);
+            }
+
             return crimes;
         })
     );
 
-    // Here emit crimes as we receive them
     const results = await Promise.all(fetchPromises);
     return results.flat();
 }

@@ -14,7 +14,6 @@ bun install
 
 ## Next
 
-* Map data as it is received (event, store)
 * On zoom out, get data for layers not currently selected - maybe make the drop-down a checkbox list to show all selected?
 
 ## Notes

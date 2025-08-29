@@ -34,43 +34,42 @@ export default function CrimeMap() {
     createEffect(() => {
         if (!state.bounds) return;
 
-        (async () => {
-            try {
-                const data = await fetchDataForViewport(state.bounds!, state.date, state.category);
+        let lastQueryDateLocal = lastQueryDate;
+        let lastQueryCategoryLocal = lastQueryCategory;
 
-                if (!data || !data.length) return;
+        // Optionally clear features if date or category changed
+        const shouldClear =
+            (state.clearOnDateChange && (!lastQueryDateLocal || lastQueryDateLocal.getTime() !== state.date.getTime())) ||
+            (state.clearOnCategoryChange && (!lastQueryCategoryLocal || lastQueryCategoryLocal !== state.category));
 
-                // Maybe clear previous features?
-                if (!lastQueryDate || (state.clearOnDateChange && lastQueryDate.getTime() !== state.date.getTime())
-                    &&
-                    (!lastQueryCategory || (state.clearOnDateChange && lastQueryCategory !== state.category))
-                ) {
-                    crimeGeoJSON.features = [];
-                    lastQueryDate = state.date;
-                }
+        if (shouldClear) {
+            crimeGeoJSON.features = [];
+            lastQueryDate = state.date;
+            lastQueryCategory = state.category;
+            renderGeoJson();
+        }
 
-                const newFeatures: CrimeFeature[] = data.map((crime) => ({
-                    type: "Feature",
-                    geometry: {
-                        type: "Point",
-                        coordinates: [
-                            parseFloat(crime.location.longitude),
-                            parseFloat(crime.location.latitude),
-                        ],
-                    },
-                    properties: {
-                        category: crime.category,
-                        outcome: crime.outcome_status?.category || "Unknown",
-                        month: crime.month,
-                    },
-                }));
+        // Fetch tiles and render each as received progressively
+        fetchDataForViewport(state.bounds, state.date, state.category, (newCrimes) => {
+            const newFeatures: CrimeFeature[] = newCrimes.map((crime) => ({
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [
+                        parseFloat(crime.location.longitude),
+                        parseFloat(crime.location.latitude),
+                    ],
+                },
+                properties: {
+                    category: crime.category,
+                    outcome: crime.outcome_status?.category || "Unknown",
+                    month: crime.month,
+                },
+            }));
 
-                crimeGeoJSON.features.push(...newFeatures);
-                renderGeoJson();
-            } catch (err) {
-                console.error("Error fetching crimes:", err);
-            }
-        })();
+            crimeGeoJSON.features.push(...newFeatures);
+            renderGeoJson();
+        }).catch(err => console.error("Error fetching crimes:", err));
     });
 
     function renderGeoJson() {
