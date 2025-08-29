@@ -12,21 +12,18 @@ export type CrimeCategory = typeof CRIME_CATEGORIES[number];
 type StoreState = {
     date: Date;
     category: CrimeCategory;
+    bounds: maplibregl.LngLatBounds | null;
 };
 
 const defaultDate = (): Date => {
     const now = new Date();
     const latestMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-    return new Date(
-        latestMonth.getFullYear(),
-        latestMonth.getMonth(),
-        1
-    );
-}
+    return new Date(latestMonth.getFullYear(), latestMonth.getMonth(), 1);
+};
 
 export const [state, setState] = createStore<StoreState>({
     date: defaultDate(),
-    category: 'violent-crime',
+    category: "violent-crime",
+    bounds: null,
 });
 
-// export const getDateString = () => `${state.date.getFullYear()}-${String(state.date.getMonth() + 1).padStart(2, "0")}`;

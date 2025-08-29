@@ -1,11 +1,11 @@
 
-import { onMount } from "solid-js";
+import { createEffect, onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
-import { state } from "../store/api-ui";
+import { setState, state, type CrimeCategory } from "../store/api-ui";
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
@@ -17,50 +17,48 @@ export default function CrimeMap() {
 
     let map: maplibregl.Map;
     let lastQueryDate: Date | null = null;
+    let lastQueryCategory: CrimeCategory | null = null;
 
-    async function updateDataInBounds() {
-        try {
-            const data = await fetchDataForViewport(
-                map.getBounds(),
-                state.date,
-                state.category
-            );
+    createEffect(() => {
+        if (!state.bounds) return;
 
-            if (!data || !data.length) {
-                console.warn("No crime data for this bbox/date");
-                return;
+        (async () => {
+            try {
+                const data = await fetchDataForViewport(state.bounds!, state.date, state.category);
+
+                if (!data || !data.length) return;
+
+                // Clear previous features - this will change to allow overlays of features
+                if (!lastQueryDate || lastQueryDate.getTime() !== state.date.getTime() ||
+                    !lastQueryCategory || lastQueryCategory !== state.category
+                ) {
+                    crimeGeoJSON.features = [];
+                    lastQueryDate = state.date;
+                }
+
+                const newFeatures: CrimeFeature[] = data.map((crime) => ({
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [
+                            parseFloat(crime.location.longitude),
+                            parseFloat(crime.location.latitude),
+                        ],
+                    },
+                    properties: {
+                        category: crime.category,
+                        outcome: crime.outcome_status?.category || "Unknown",
+                        month: crime.month,
+                    },
+                }));
+
+                crimeGeoJSON.features.push(...newFeatures);
+                renderGeoJson();
+            } catch (err) {
+                console.error("Error fetching crimes:", err);
             }
-
-            // Only clear features if the date changed
-            if (lastQueryDate !== state.date) {
-                crimeGeoJSON.features = [];
-                lastQueryDate = state.date;
-            }
-
-            const newFeatures: CrimeFeature[] = data.map((crime) => ({
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [
-                        parseFloat(crime.location.longitude),
-                        parseFloat(crime.location.latitude),
-                    ],
-                },
-                properties: {
-                    category: crime.category,
-                    outcome: crime.outcome_status?.category || "Unknown",
-                    month: crime.month,
-                },
-            }));
-
-            crimeGeoJSON.features.push(...newFeatures);
-            renderGeoJson();
-        } catch (err) {
-            console.error("Error fetching crimes:", err);
-        }
-    }
-
-
+        })();
+    });
 
     function renderGeoJson() {
         if (!map) return;
@@ -137,8 +135,11 @@ export default function CrimeMap() {
             attributionControl: false,
         });
 
-        map.on('load', updateDataInBounds);
-        map.on("moveend", updateDataInBounds);
+        // map.on('load', updateDataInBounds);
+        // map.on("moveend", updateDataInBounds);
+
+        map.on('load', () => setState("bounds", map.getBounds()));
+        map.on("moveend", () => setState("bounds", map.getBounds()));
     });
 
     return <section ref={mapContainer} style="width:100vw;height:100vh;"></section>;
