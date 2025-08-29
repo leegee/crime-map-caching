@@ -1,5 +1,8 @@
+import pLimit from "p-limit";
 import { TileCache } from "./tiles";
 import type { Crime } from "./types";
+
+const limit = pLimit(15); // max 15 concurrent requests
 
 async function fetchData(
     sw: [number, number],
@@ -8,7 +11,7 @@ async function fetchData(
     category: string = "burglary"
 ): Promise<Crime[]> {
     try {
-        console.log('sw, ne', sw, ne)
+        console.log('sw, ne', sw, ne);
         const nw: [number, number] = [ne[0], sw[1]];
         const se: [number, number] = [sw[0], ne[1]];
 
@@ -31,7 +34,6 @@ async function fetchData(
     }
 }
 
-
 const tileCache = new TileCache({
     minLon: -180,
     minLat: -90,
@@ -51,19 +53,19 @@ export async function fetchDataForViewport(
 
     const tilesToFetch = tileCache.getTilesToFetch(minLon, minLat, maxLon, maxLat);
 
-    const allCrimes: Crime[] = [];
+    // Map tiles to limited fetch promises
+    const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
+        limit(async () => {
+            const tileBBox = tileCache.tileToBBox(tileX, tileY);
+            const sw: [number, number] = [tileBBox.minLat, tileBBox.minLon]; // lat, lon
+            const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon]; // lat, lon
 
-    for (const [tileX, tileY] of tilesToFetch) {
-        const tileBBox = tileCache.tileToBBox(tileX, tileY);
+            const crimes = await fetchData(sw, ne, date, category);
+            tileCache.markTileLoaded(tileX, tileY); // mark tile loaded
+            return crimes;
+        })
+    );
 
-        const sw: [number, number] = [tileBBox.minLat, tileBBox.minLon]; // lat, lon
-        const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon]; // lat, lon
-
-        const crimes = await fetchData(sw, ne, date, category);
-        allCrimes.push(...crimes);
-
-        tileCache.markTileLoaded(tileX, tileY); // mark tile loaded
-    }
-
-    return allCrimes;
+    const results = await Promise.all(fetchPromises);
+    return results.flat();
 }
