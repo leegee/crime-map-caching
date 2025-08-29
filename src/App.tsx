@@ -1,5 +1,9 @@
 import CrimeMap from "./components/CrimeMap";
+import Controls from "./components/controls";
 
 export default function App() {
-  return <CrimeMap />;
+  return <main>
+    <CrimeMap />
+    <Controls />
+  </main>
 }
