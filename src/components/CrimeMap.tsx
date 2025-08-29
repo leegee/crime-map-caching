@@ -4,13 +4,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
-
-const crimeCategory = 'violent-crime';
-const now = new Date();
-const latestMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-const year = latestMonth.getFullYear();
-const month = String(latestMonth.getMonth() + 1).padStart(2, "0");
-const date = `${year}-${month}`;
+import { state } from "../store/api-ui";
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
@@ -27,8 +21,8 @@ export default function CrimeMap() {
         try {
             const data = await fetchDataForViewport(
                 map.getBounds(),
-                date,
-                crimeCategory
+                state.date,
+                state.crimeCategory
             );
 
             if (!data || !data.length) {
@@ -37,9 +31,9 @@ export default function CrimeMap() {
             }
 
             // Only clear features if the date changed
-            if (lastQueryDate !== date) {
+            if (lastQueryDate !== state.date) {
                 crimeGeoJSON.features = [];
-                lastQueryDate = date;
+                lastQueryDate = state.date;
             }
 
             const newFeatures: CrimeFeature[] = data.map((crime) => ({

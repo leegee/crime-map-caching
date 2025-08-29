@@ -14,7 +14,7 @@ type StoreState = {
     crimeCategory: CrimeCategory;
 };
 
-const defaultDate = () => {
+const defaultDate = (): string => {
     const now = new Date();
     const latestMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1);
     const defaultYear = latestMonth.getFullYear();
