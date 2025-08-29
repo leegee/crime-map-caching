@@ -27,8 +27,8 @@ export default function CrimeMap() {
         try {
             const data = await fetchDataForViewport(
                 map.getBounds(),
-                // date,
-                // crimeCategory
+                date,
+                crimeCategory
             );
 
             if (!data || !data.length) {
