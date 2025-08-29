@@ -146,5 +146,5 @@ export default function CrimeMap() {
         map.on("moveend", updateDataInBounds);
     });
 
-    return <div ref={mapContainer} style="width:100vw;height:100vh;"></div>;
+    return <section ref={mapContainer} style="width:100vw;height:100vh;"></section>;
 }
