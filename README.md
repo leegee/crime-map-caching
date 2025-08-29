@@ -1,7 +1,7 @@
 ## Usage
 
 ```bash
-$ npm install # or pnpm install or yarn install
+bun install
 ```
 
 * Allows 15 concurrent addresses cf [Rate limit](https://data.police.uk/docs/api-call-limits/) of 15 requests per second with bursts of 30 per second
