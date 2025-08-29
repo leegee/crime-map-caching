@@ -57,15 +57,16 @@ export async function fetchDataForViewport(
     const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
         limit(async () => {
             const tileBBox = tileCache.tileToBBox(tileX, tileY);
-            const sw: [number, number] = [tileBBox.minLat, tileBBox.minLon]; // lat, lon
-            const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon]; // lat, lon
+            const sw: [number, number] = [tileBBox.minLat, tileBBox.minLon];
+            const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon];
 
             const crimes = await fetchData(sw, ne, date, category);
-            tileCache.markTileLoaded(tileX, tileY); // mark tile loaded
+            tileCache.markTileLoaded(tileX, tileY);
             return crimes;
         })
     );
 
+    // Here emit crimes as we receive them
     const results = await Promise.all(fetchPromises);
     return results.flat();
 }
