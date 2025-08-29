@@ -4,6 +4,12 @@
 $ npm install # or pnpm install or yarn install
 ```
 
+## Next
+
+Map data as it is received (event, store)
+
+## Notes
+
 https://data.police.uk/api/crimes-street/rape?poly=51.489827466868945,-0.14344636271601985:51.489827466868945,-0.10308092969165727:51.50810622724032,-0.10308092969165727:51.50810622724032,-0.14344636271601985:51.489827466868945,-0.14344636271601985&date=2025-06
 
 
