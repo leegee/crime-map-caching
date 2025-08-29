@@ -39,9 +39,10 @@ export default function CrimeMap() {
 
                 if (!data || !data.length) return;
 
-                // Clear previous features - this will change to allow overlays of features
-                if (!lastQueryDate || lastQueryDate.getTime() !== state.date.getTime() ||
-                    !lastQueryCategory || lastQueryCategory !== state.category
+                // Maybe clear previous features?
+                if (!lastQueryDate || (state.clearOnDateChange && lastQueryDate.getTime() !== state.date.getTime())
+                    &&
+                    (!lastQueryCategory || (state.clearOnDateChange && lastQueryCategory !== state.category))
                 ) {
                     crimeGeoJSON.features = [];
                     lastQueryDate = state.date;
