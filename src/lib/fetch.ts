@@ -71,7 +71,7 @@ export async function fetchDataForViewport(
             const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon];
 
             const crimes = await fetchData(sw, ne, date, category);
-            tileCache.markTileLoaded(state.category, state.date, tileX, tileY);
+            tileCache.markTileLoaded(category, date, tileX, tileY);
             return crimes;
         })
     );
