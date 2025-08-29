@@ -4,16 +4,17 @@
 $ npm install # or pnpm install or yarn install
 ```
 
+* Allows 15 concurrent addresses cf [Rate limit](https://data.police.uk/docs/api-call-limits/) of 15 requests per second with bursts of 30 per second
+
 ## Next
 
 * Map data as it is received (event, store)
-* Allow 15 concurrent addresses - re-check API docs
+* Add crime-type filter UI and date UI
 
 ## Notes
 
 [Police API Docs](https://data.police.uk/docs/)
 
-[Rate limit](https://data.police.uk/docs/api-call-limits/) of 15 requests per second with bursts of 30 per second
 
 https://data.police.uk/api/crimes-street/rape?poly=51.489827466868945,-0.14344636271601985:51.489827466868945,-0.10308092969165727:51.50810622724032,-0.10308092969165727:51.50810622724032,-0.14344636271601985:51.489827466868945,-0.14344636271601985&date=2025-06
 
