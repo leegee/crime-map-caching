@@ -10,19 +10,23 @@ export const CRIME_CATEGORIES = [
 export type CrimeCategory = typeof CRIME_CATEGORIES[number];
 
 type StoreState = {
-    date: string;
-    crimeCategory: CrimeCategory;
+    date: Date;
+    category: CrimeCategory;
 };
 
-const defaultDate = (): string => {
+const defaultDate = (): Date => {
     const now = new Date();
     const latestMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-    const defaultYear = latestMonth.getFullYear();
-    const defaultMonth = String(latestMonth.getMonth() + 1).padStart(2, "0");
-    return `${defaultYear}-${defaultMonth}`;
+    return new Date(
+        latestMonth.getFullYear(),
+        latestMonth.getMonth(),
+        1
+    );
 }
 
 export const [state, setState] = createStore<StoreState>({
     date: defaultDate(),
-    crimeCategory: 'violent-crime',
+    category: 'violent-crime',
 });
+
+// export const getDateString = () => `${state.date.getFullYear()}-${String(state.date.getMonth() + 1).padStart(2, "0")}`;

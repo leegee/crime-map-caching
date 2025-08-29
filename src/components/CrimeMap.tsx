@@ -2,6 +2,7 @@
 import { onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+
 import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { state } from "../store/api-ui";
@@ -15,14 +16,14 @@ export default function CrimeMap() {
     };
 
     let map: maplibregl.Map;
-    let lastQueryDate: string | null = null;
+    let lastQueryDate: Date | null = null;
 
     async function updateDataInBounds() {
         try {
             const data = await fetchDataForViewport(
                 map.getBounds(),
                 state.date,
-                state.crimeCategory
+                state.category
             );
 
             if (!data || !data.length) {

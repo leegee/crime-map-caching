@@ -1,13 +1,14 @@
 import pLimit from "p-limit";
 import { TileCache } from "./tiles";
 import type { Crime } from "./types";
+import { state } from "../store/api-ui";
 
 const limit = pLimit(15); // max 15 concurrent requests
 
 async function fetchData(
     sw: [number, number],
     ne: [number, number],
-    date: string | undefined,
+    date: Date,
     category: string = "burglary"
 ): Promise<Crime[]> {
     try {
@@ -20,7 +21,7 @@ async function fetchData(
             .join(":");
 
         let url = `https://data.police.uk/api/crimes-street/${category}?poly=${poly}`;
-        if (date) url += `&date=${date}`;
+        if (date) url += `&date=${formatDateForUrl(date)}`;
         console.log("Fetching crimes from URL:", url);
 
         const res = await fetch(url);
@@ -41,9 +42,11 @@ const tileCache = new TileCache({
     tileHeight: 0.25,
 });
 
+const formatDateForUrl = (date: Date): string => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
 export async function fetchDataForViewport(
     bounds: maplibregl.LngLatBounds,
-    date?: string,
+    date: Date,
     category: string = "burglary"
 ): Promise<Crime[]> {
     const minLon = bounds.getWest();
@@ -51,7 +54,9 @@ export async function fetchDataForViewport(
     const maxLon = bounds.getEast();
     const maxLat = bounds.getNorth();
 
-    const tilesToFetch = tileCache.getTilesToFetch(minLon, minLat, maxLon, maxLat);
+    date ||= state.date;
+
+    const tilesToFetch = tileCache.getTilesToFetch(category, date, minLon, minLat, maxLon, maxLat);
 
     // Map tiles to limited fetch promises
     const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
@@ -61,7 +66,7 @@ export async function fetchDataForViewport(
             const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon];
 
             const crimes = await fetchData(sw, ne, date, category);
-            tileCache.markTileLoaded(tileX, tileY);
+            tileCache.markTileLoaded(state.category, state.date, tileX, tileY);
             return crimes;
         })
     );
