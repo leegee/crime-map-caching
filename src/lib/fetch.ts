@@ -35,8 +35,8 @@ async function fetchData(
 const tileCache = new TileCache({
     minLon: -180,
     minLat: -90,
-    tileWidth: 0.5,
-    tileHeight: 0.5,
+    tileWidth: 0.25,
+    tileHeight: 0.25,
 });
 
 export async function fetchDataForViewport(
