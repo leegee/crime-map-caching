@@ -5,7 +5,8 @@ import { state } from "../store/api-ui";
 
 type CrimeCallback = (crimes: Crime[]) => void;
 
-const limit = pLimit(15); // max 15 concurrent requests
+const limit = pLimit(10); // max concurrent requests
+const latLngPrecision = 6;
 
 async function fetchData(
     sw: [number, number],
@@ -57,10 +58,10 @@ export async function fetchDataForViewport(
     category: string = "violent-crime",
     onTileData?: CrimeCallback,
 ): Promise<boolean> {
-    const minLon = bounds.getWest();
-    const minLat = bounds.getSouth();
-    const maxLon = bounds.getEast();
-    const maxLat = bounds.getNorth();
+    const minLon = bounds.getWest().toFixed(latLngPrecision);
+    const minLat = bounds.getSouth().toFixed(latLngPrecision);
+    const maxLon = bounds.getEast().toFixed(latLngPrecision);
+    const maxLat = bounds.getNorth().toFixed(latLngPrecision);
 
     date ||= state.date;
 
