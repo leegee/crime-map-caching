@@ -3,4 +3,44 @@
     top: 0;
     left: 0;
     padding: 1em;
+
+    div {
+        display: flex;
+        flex-direction: row;
+
+        input[type=month],
+        select {
+            width: 10em;
+            height: 2em;
+            padding: 4pt;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: inherit;
+            margin-bottom: 2pt;
+        }
+
+        input[type=checkbox] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 2em;
+            height: 2em;
+            border: 2px solid #888;
+            border-radius: 0.3em;
+            position: relative;
+            cursor: pointer;
+        }
+
+        input[type=checkbox]:checked::after {
+            content: '';
+            position: absolute;
+            left: 0.4em;
+            top: 0.1em;
+            width: 0.5em;
+            height: 1em;
+            border: solid lime;
+            border-width: 0 0.2em 0.2em 0;
+            transform: rotate(45deg);
+            background-color: black;
+        }
+    }
 }
