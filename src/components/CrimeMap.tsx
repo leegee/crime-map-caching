@@ -51,6 +51,7 @@ export default function CrimeMap() {
 
         // Fetch tiles and render each as received progressively
         fetchDataForViewport(state.bounds, state.date, state.category, (newCrimes) => {
+            setState('loading', true);
             const newFeatures: CrimeFeature[] = newCrimes.map((crime) => ({
                 type: "Feature",
                 geometry: {
@@ -69,7 +70,9 @@ export default function CrimeMap() {
 
             crimeGeoJSON.features.push(...newFeatures);
             renderGeoJson();
-        }).catch(err => console.error("Error fetching crimes:", err));
+        })
+            .then(() => setState('loading', false))
+            .catch(err => console.error("Error fetching crimes:", err));
     });
 
     function renderGeoJson() {

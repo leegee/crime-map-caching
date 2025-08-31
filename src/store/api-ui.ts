@@ -7,6 +7,7 @@ type StoreState = {
     clearOnDateChange: boolean;
     clearOnCategoryChange: boolean;
     bounds: maplibregl.LngLatBounds | null;
+    loading: boolean;
 };
 
 const defaultDate = (): Date => {
@@ -21,5 +22,6 @@ export const [state, setState] = createStore<StoreState>({
     category: "violent-crime",
     clearOnCategoryChange: true,
     bounds: null,
+    loading: false,
 });
 

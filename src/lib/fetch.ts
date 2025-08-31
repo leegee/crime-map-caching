@@ -56,7 +56,7 @@ export async function fetchDataForViewport(
     date: Date,
     category: string = "violent-crime",
     onTileData?: CrimeCallback,
-): Promise<Crime[]> {
+): Promise<boolean> {
     const minLon = bounds.getWest();
     const minLat = bounds.getSouth();
     const maxLon = bounds.getEast();
@@ -84,6 +84,8 @@ export async function fetchDataForViewport(
         })
     );
 
-    const results = await Promise.all(fetchPromises);
-    return results.flat();
+    // const results = await Promise.all(fetchPromises);
+    // return results.flat();
+    await Promise.all(fetchPromises);
+    return true;
 }
