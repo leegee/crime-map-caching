@@ -58,10 +58,10 @@ export async function fetchDataForViewport(
     category: string = "violent-crime",
     onTileData?: CrimeCallback,
 ): Promise<boolean> {
-    const minLon = bounds.getWest().toFixed(latLngPrecision);
-    const minLat = bounds.getSouth().toFixed(latLngPrecision);
-    const maxLon = bounds.getEast().toFixed(latLngPrecision);
-    const maxLat = bounds.getNorth().toFixed(latLngPrecision);
+    const minLon = Number(bounds.getWest().toFixed(latLngPrecision));
+    const minLat = Number(bounds.getSouth().toFixed(latLngPrecision));
+    const maxLon = Number(bounds.getEast().toFixed(latLngPrecision));
+    const maxLat = Number(bounds.getNorth().toFixed(latLngPrecision));
 
     date ||= state.date;
 
