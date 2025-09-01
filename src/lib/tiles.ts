@@ -15,7 +15,6 @@ interface TileGridOptions {
     tileHeight: number;
 }
 
-
 export class TileCache {
     // nested cache: category -> dateKey -> Set<TileKey>
     private loadedTiles: Map<string, Map<string, Set<TileKey>>> = new Map();
@@ -175,9 +174,26 @@ export class TileCache {
         for (const { category, dateKey, key } of tilesFlat) {
             if (freedBytes + BYTES_PER_TILE_EST > estimatedCacheBytes - targetBytes) break;
 
-            this.loadedTiles.get(category)?.get(dateKey)?.delete(key);
-            this.lastUsed.get(category)?.get(dateKey)?.delete(key);
+            const dateSet = this.loadedTiles.get(category)?.get(dateKey);
+            const lastUsedMap = this.lastUsed.get(category)?.get(dateKey);
+
+            dateSet?.delete(key);
+            lastUsedMap?.delete(key);
             freedBytes += BYTES_PER_TILE_EST;
+
+            // 🧹 cleanup empty sets/maps
+            if (dateSet && dateSet.size === 0) {
+                this.loadedTiles.get(category)?.delete(dateKey);
+            }
+            if (lastUsedMap && lastUsedMap.size === 0) {
+                this.lastUsed.get(category)?.delete(dateKey);
+            }
+            if (this.loadedTiles.get(category)?.size === 0) {
+                this.loadedTiles.delete(category);
+            }
+            if (this.lastUsed.get(category)?.size === 0) {
+                this.lastUsed.delete(category);
+            }
         }
 
         console.log(`Purged ${Math.floor(freedBytes / BYTES_PER_TILE_EST)} tiles to stay under quota`);
