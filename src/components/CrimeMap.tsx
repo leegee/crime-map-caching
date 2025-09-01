@@ -33,21 +33,28 @@ export default function CrimeMap() {
     let lastQuery: Record<string, string> = {};
 
     createEffect(() => {
-        if (!state.bounds || !state.categories?.length) return;
+        if (!state.bounds) return;
+
+        // Remove features whose categories are no longer selected
+        crimeGeoJSON.features = crimeGeoJSON.features.filter(f =>
+            state.categories?.includes(f.properties?.category)
+        );
+
+        renderGeoJson();
 
         const tilesToFetchPromises: Promise<void>[] = [];
+
+        if (!state.categories?.length) return;
 
         for (const category of state.categories) {
             const lastKey = lastQuery[category];
             const dateKey = state.date.toISOString().slice(0, 7); // YYYY-MM
-            const shouldClear =
-                state.clearOnCategoryChange && lastKey !== dateKey;
+            const shouldClear = lastKey !== dateKey;
 
             if (shouldClear) {
-                // Remove old features of this category
+                // Remove old features of this category for new month
                 crimeGeoJSON.features = crimeGeoJSON.features.filter(f => f.properties?.category !== category);
                 lastQuery[category] = dateKey;
-                renderGeoJson();
             }
 
             // Fetch tiles for this category
@@ -75,8 +82,9 @@ export default function CrimeMap() {
             );
         }
 
-        // Trigger all fetches in parallel
         Promise.all(tilesToFetchPromises).catch(err => console.error(err));
+
+        renderGeoJson();
     });
 
     function renderGeoJson() {

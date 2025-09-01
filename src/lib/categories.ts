@@ -1,8 +1,8 @@
 export const crimeCategories = {
-    "all-crime": {
-        description: "All crime",
-        colour: "rgb(128, 128, 128)", // grey
-    },
+    // "all-crime": {
+    //     description: "All crime",
+    //     colour: "rgb(128, 128, 128)", // grey
+    // },
     "anti-social-behaviour": {
         description: "Anti-social behaviour",
         colour: "rgb(255, 204, 102)", // light orange
