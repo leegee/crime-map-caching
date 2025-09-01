@@ -80,17 +80,25 @@ export async function fetchDataForViewport(
             const sw: [number, number] = [tileBBox.minLat, tileBBox.minLon];
             const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon];
 
-            const crimes = await fetchData(sw, ne, date, category);
+            try {
+                const crimes = await fetchData(sw, ne, date, category);
 
-            if (crimes.length > 0) {
-                tileCache.markTileLoaded(category, dateKey, tileX, tileY);
+                if (crimes.length > 0) {
+                    tileCache.markTileLoaded(category, dateKey, tileX, tileY);
 
-                if (onTileData) {
-                    onTileData(crimes);
+                    if (onTileData) {
+                        onTileData(crimes);
+                    }
                 }
+
+                return crimes;
+
             }
 
-            return crimes;
+            catch (err) {
+                console.warn(`Failed to fetch tile (${tileX}, ${tileY}), will retry later.`, err);
+                return [];
+            }
         })
     );
 
