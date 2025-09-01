@@ -1,7 +1,6 @@
 import pLimit from "p-limit";
 import { TileCache } from "./tiles";
 import type { Crime } from "./types";
-import { state } from "../store/api-ui";
 
 type CrimeCallback = (crimes: Crime[]) => void;
 
@@ -62,8 +61,6 @@ export async function fetchDataForViewport(
     const minLat = Number(bounds.getSouth().toFixed(latLngPrecision));
     const maxLon = Number(bounds.getEast().toFixed(latLngPrecision));
     const maxLat = Number(bounds.getNorth().toFixed(latLngPrecision));
-
-    date ||= state.date;
 
     const tilesToFetch = tileCache.getTilesToFetch(category, date, minLon, minLat, maxLon, maxLat);
 
