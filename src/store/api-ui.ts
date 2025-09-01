@@ -22,6 +22,6 @@ export const [state, setState] = createStore<StoreState>({
     categories: ["violent-crime"],
     bounds: null,
     loading: false,
-    baseLayer: 'light',
+    baseLayer: 'dark',
 });
 

@@ -47,6 +47,8 @@ export default function CrimeMap() {
     createEffect(() => {
         if (!state.bounds) return;
 
+        setState('loading', false)
+
         // Remove features whose categories are no longer selected
         crimeGeoJSON.features = crimeGeoJSON.features.filter(f =>
             state.categories?.includes(f.properties?.category)
@@ -97,6 +99,7 @@ export default function CrimeMap() {
         Promise.all(tilesToFetchPromises).catch(err => console.error(err));
 
         renderGeoJson();
+        setState('loading', true);
     });
 
     function renderGeoJson() {
