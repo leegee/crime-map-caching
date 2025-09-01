@@ -34,13 +34,10 @@ export default function CrimeMap() {
 
     // Light/dark basemap toggle
     createEffect(() => {
-        console.log('fx', state.baseLayer)
         if (map && map.getLayer("basemap-dark") && map.getLayer("basemap-light")) {
             map.setLayoutProperty("basemap-dark", "visibility", state.baseLayer === "dark" ? "visible" : "none");
             map.setLayoutProperty("basemap-light", "visibility", state.baseLayer === "light" ? "visible" : "none");
-            console.log('fx changed layer')
         }
-        console.log('fx done')
     });
 
     // Re-render on state change - category, date, bounds

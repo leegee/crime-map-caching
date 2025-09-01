@@ -25,7 +25,6 @@ async function fetchData(
     date: Date,
     category: string = "violent-crime"
 ): Promise<Crime[]> {
-    console.log("sw, ne", sw, ne);
     const nw: [number, number] = [ne[0], sw[1]];
     const se: [number, number] = [sw[0], ne[1]];
 
@@ -36,7 +35,6 @@ async function fetchData(
     let url = `https://data.police.uk/api/crimes-street/${category}?poly=${poly}`;
     if (date) url += `&date=${formatDateForUrl(date)}`;
     console.log("Fetching crimes from URL:", url);
-    console.log("Date", formatDateForUrl(date));
 
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP error - status: ${res.status}`);
