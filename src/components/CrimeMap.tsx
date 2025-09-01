@@ -37,10 +37,12 @@ export default function CrimeMap() {
         let lastQueryDateLocal = lastQueryDate;
         let lastQueryCategoryLocal = lastQueryCategory;
 
-        // Optionally clear features if date or category changed
+        const dateChanged = !lastQueryDateLocal || lastQueryDateLocal.getTime() !== state.date.getTime();
+        const categoryChanged = !lastQueryCategoryLocal || lastQueryCategoryLocal !== state.category;
+
         const shouldClear =
-            (state.clearOnDateChange && (!lastQueryDateLocal || lastQueryDateLocal.getTime() !== state.date.getTime())) ||
-            (state.clearOnCategoryChange && (!lastQueryCategoryLocal || lastQueryCategoryLocal !== state.category));
+            (state.clearOnDateChange && dateChanged) ||
+            (state.clearOnCategoryChange && categoryChanged);
 
         if (shouldClear) {
             crimeGeoJSON.features = [];
