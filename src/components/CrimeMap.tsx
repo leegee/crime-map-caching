@@ -34,8 +34,6 @@ export default function CrimeMap() {
     createEffect(() => {
         if (!state.bounds) return;
 
-        setState("loading", true);
-
         // Remove features whose categories are no longer selected
         crimeGeoJSON.features = crimeGeoJSON.features.filter(f =>
             state.categories?.includes(f.properties?.category)
@@ -45,10 +43,9 @@ export default function CrimeMap() {
 
         const tilesToFetchPromises: Promise<void>[] = [];
 
-        if (!state.categories?.length) {
-            setState("loading", false);
-            return;
-        }
+        if (!state.categories?.length) return;
+
+        setState("loading", true);
 
         for (const category of state.categories) {
             const lastDateKey = lastQuery[category];
