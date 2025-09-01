@@ -2,6 +2,7 @@ import { formatDateForUrl } from "./format-date";
 
 const BYTES_PER_TILE_EST = 1024;
 const USE_AVAILALBE_CACHE_FACTOR = 0.6;
+const MAX_CACHE_BYTES = 50 * 1024 * 1024;
 
 type TileKey = string;
 
@@ -20,7 +21,6 @@ export class TileCache {
     private loadedTiles: Map<string, Map<string, Set<TileKey>>> = new Map();
     private opts: TileGridOptions;
     private lastUsed: Map<string, Map<string, Map<TileKey, number>>> = new Map();
-    private MAX_CACHE_BYTES = 50 * 1024 * 1024; // optional fallback 50MB
 
     constructor(opts: TileGridOptions) {
         this.opts = opts;
@@ -36,10 +36,12 @@ export class TileCache {
                 const { quota, usage } = await navigator.storage.estimate();
                 return quota! - usage!;
             } catch {
-                return this.MAX_CACHE_BYTES; // fallback
+                console.warn("Falling back to static MAX_CACHE_BYTES,", MAX_CACHE_BYTES);
+                return MAX_CACHE_BYTES;
             }
         }
-        return this.MAX_CACHE_BYTES;
+        console.warn("Falling back to static MAX_CACHE_BYTES,", MAX_CACHE_BYTES);
+        return MAX_CACHE_BYTES;
     }
 
     markTileLoaded(category: string, dateKey: string, x: number, y: number) {
