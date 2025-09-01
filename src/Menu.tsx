@@ -15,7 +15,7 @@ export default function Controls() {
                         <i>menu</i>
                     </button>
                     <Show when={expanded()}>
-                        Police API Visualisation
+                        Police API Crime Visualisation
                     </Show>
                 </header>
 
