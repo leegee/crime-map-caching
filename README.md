@@ -4,17 +4,13 @@
 
 Out of the respect to the tax payer-funded API
 [Rate limit](https://data.police.uk/docs/api-call-limits/),
-makes no more than 15 requests per second, and out of respect of the user caches a lot of data.
+makes no more than 10 requests per second, and out of respect of the user caches to Index DB, purging when reaching the maximum allowed by the storage manager.
 
 ## Usage
 
 ```bash
 bun install
 ```
-
-## Next
-
-* On zoom out, get data for layers not currently selected - maybe make the drop-down a checkbox list to show all selected?
 
 ## Notes
 
