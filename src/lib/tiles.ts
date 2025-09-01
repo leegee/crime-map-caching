@@ -113,4 +113,22 @@ export class TileCache {
         return tiles;
     }
 
+    public getTilesToFetchWithLruUpdate(
+        category: string,
+        dateKey: string,
+        tiles: TileCoord[]
+    ): TileCoord[] {
+        const tilesToFetch: TileCoord[] = [];
+
+        for (const [x, y] of tiles) {
+            if (this.isTileLoaded(category, dateKey, x, y)) {
+                this.updateLruTimestamp(category, dateKey, x, y);
+            } else {
+                tilesToFetch.push([x, y]);
+            }
+        }
+
+        return tilesToFetch;
+    }
+
 }

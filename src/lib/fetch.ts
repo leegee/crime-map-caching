@@ -64,15 +64,7 @@ export async function fetchDataForViewport(
     // Get all tiles covering the viewport
     const tilesInView = tileCache.getTilesInBBox(minLon, minLat, maxLon, maxLat);
 
-    const tilesToFetch: TileCoord[] = [];
-
-    for (const [x, y] of tilesInView) {
-        if (tileCache.isTileLoaded(category, dateKey, x, y)) {
-            tileCache.updateLruTimestamp(category, dateKey, x, y);
-        } else {
-            tilesToFetch.push([x, y]);
-        }
-    }
+    const tilesToFetch = tileCache.getTilesToFetchWithLruUpdate(category, dateKey, tilesInView);
 
     // Fetch missing tiles in parallel with a limit
     const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
@@ -99,7 +91,9 @@ export async function fetchDataForViewport(
                 }
 
                 return crimes;
-            } catch (err) {
+            }
+
+            catch (err) {
                 console.warn(
                     `Failed to fetch tile (${tileX}, ${tileY}), will retry later.`,
                     err
