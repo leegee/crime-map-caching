@@ -1,4 +1,3 @@
-import { Match, Switch } from "solid-js"
 import { state, setState } from "../../store/api-ui"
 
 export default function ThemeToggle() {
