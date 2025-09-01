@@ -45,7 +45,10 @@ export default function CrimeMap() {
 
         const tilesToFetchPromises: Promise<void>[] = [];
 
-        if (!state.categories?.length) return;
+        if (!state.categories?.length) {
+            setState("loading", false);
+            return;
+        }
 
         for (const category of state.categories) {
             const lastDateKey = lastQuery[category];
