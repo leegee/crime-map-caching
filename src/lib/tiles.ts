@@ -1,10 +1,12 @@
 import { formatDateForUrl } from "./format-date";
+import { saveTileToDB, deleteTileFromDB } from "./tile-cache-db";
+
 
 const BYTES_PER_TILE_EST = 1024;
 const USE_AVAILALBE_CACHE_FACTOR = 0.6;
 const MAX_CACHE_BYTES = 50 * 1024 * 1024;
 
-type TileKey = string;
+export type TileKey = string;
 
 export type TileCoord = [number, number];
 
@@ -55,6 +57,8 @@ export class TileCache {
         const lastUsedDateMap = this.lastUsed.get(category)!;
         if (!lastUsedDateMap.has(dateKey)) lastUsedDateMap.set(dateKey, new Map());
         lastUsedDateMap.get(dateKey)!.set(key, Date.now());
+
+        saveTileToDB({ key, category, dateKey, lastUsed: Date.now() }).catch(console.error);
     }
 
     updateLruTimestamp(category: string, dateKey: string, x: number, y: number) {
@@ -171,6 +175,8 @@ export class TileCache {
         if (lastUsedCategoryMap?.size === 0) {
             this.lastUsed.delete(category);
         }
+
+        deleteTileFromDB(key).catch(console.error);
     }
 
     // LRU purge

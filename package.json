@@ -14,6 +14,7 @@
     "@types/maplibre-gl": "^1.14.0",
     "beercss": "^3.11.33",
     "debounce": "^2.2.0",
+    "idb": "^8.0.3",
     "maplibre-gl": "^5.7.0",
     "p-limit": "^7.1.1",
     "solid-js": "^1.9.8"
