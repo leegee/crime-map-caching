@@ -12,6 +12,8 @@ makes no more than 10 requests per second, and out of respect of the user caches
 bun install
 ```
 
+![Screenshot](./README.png)
+
 ## Notes
 
 [Police API Docs](https://data.police.uk/docs/)
