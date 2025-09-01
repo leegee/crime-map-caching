@@ -12,14 +12,7 @@ export default function ThemeToggle() {
                 />
                 <span>
                     &nbsp;
-                    <Switch>
-                        <Match when={state.baseLayer === 'light'}>
-                            Light Base
-                        </Match>
-                        <Match when={state.baseLayer === 'dark'}>
-                            Dark Base
-                        </Match>
-                    </Switch>
+                    Toggle map colour
                 </span>
             </label>
         </div>
