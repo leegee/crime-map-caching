@@ -1,6 +1,7 @@
 import { createSignal, Show, } from "solid-js";
 import Category from './components/controls/Category';
 import Date from './components/controls/Date';
+import ThemeToggle from "./components/controls/ThemeToggle";
 
 export default function Controls() {
     const [expanded, setExpanded] = createSignal(true);
@@ -18,6 +19,13 @@ export default function Controls() {
                         Police API Crime Visualisation
                     </Show>
                 </header>
+
+                <div class="menu-item row">
+                    <span class="small-padding"><i>calendar_month</i></span>
+                    <Show when={expanded()}>
+                        <ThemeToggle />
+                    </Show>
+                </div>
 
                 <div class="menu-item row">
                     <span class="small-padding"><i>calendar_month</i></span>

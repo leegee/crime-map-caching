@@ -7,6 +7,7 @@ type StoreState = {
     clearOnDateChange: boolean;
     bounds: maplibregl.LngLatBounds | null;
     loading: boolean;
+    baseLayer: "dark" | "light";
 };
 
 const defaultDate = (): Date => {
@@ -21,5 +22,6 @@ export const [state, setState] = createStore<StoreState>({
     categories: ["violent-crime"],
     bounds: null,
     loading: false,
+    baseLayer: 'light',
 });
 

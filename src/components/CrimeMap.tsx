@@ -32,6 +32,18 @@ export default function CrimeMap() {
     // Keep track of last queries per category
     let lastQuery: Record<string, string> = {};
 
+    // Light/dark basemap toggle
+    createEffect(() => {
+        console.log('fx', state.baseLayer)
+        if (map && map.getLayer("basemap-dark") && map.getLayer("basemap-light")) {
+            map.setLayoutProperty("basemap-dark", "visibility", state.baseLayer === "dark" ? "visible" : "none");
+            map.setLayoutProperty("basemap-light", "visibility", state.baseLayer === "light" ? "visible" : "none");
+            console.log('fx changed layer')
+        }
+        console.log('fx done')
+    });
+
+    // Re-render on state change - category, date, bounds
     createEffect(() => {
         if (!state.bounds) return;
 
@@ -116,13 +128,12 @@ export default function CrimeMap() {
                 new maplibregl.Popup()
                     .setLngLat(coordinates as [number, number])
                     .setHTML(`
-            <div style="color: black; background: oldlace;">
-              <p><strong>${feature.properties.category}</strong></p>
-              <p>Outcome: ${feature.properties.outcome}</p>
-              <p>Month: ${feature.properties.month}</p>
-            </div>
-          `)
-                    .addTo(map);
+                        <div style="color: black; background: oldlace;">
+                        <p><strong>${feature.properties.category}</strong></p>
+                        <p>Outcome: ${feature.properties.outcome}</p>
+                        <p>Month: ${feature.properties.month}</p>
+                        </div>`
+                    ).addTo(map);
             });
         }
     }
@@ -130,38 +141,56 @@ export default function CrimeMap() {
     onMount(() => {
         map = new maplibregl.Map({
             container: mapContainer!,
-            center: [-0.1278, 51.5074], // London
+            center: [-0.1278, 51.5074],
             zoom: 14,
             style: {
                 version: 8,
-                sources: {
-                    basemap: {
-                        type: "raster",
-                        tiles: [
-                            "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-                            "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-                            "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-                            "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-                        ],
-                        tileSize: 256,
-                        attribution:
-                            '© <a href="https://carto.com/">CARTO</a> © <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-                    },
-                },
-                layers: [
-                    {
-                        id: "basemap",
-                        type: "raster",
-                        source: "basemap",
-                        minzoom: 0,
-                        maxzoom: 19,
-                    },
-                ],
+                sources: {},
+                layers: [],
             },
             attributionControl: false,
         });
 
-        map.on("load", () => setState("bounds", map.getBounds()));
+        map.on("load", () => {
+            map.addSource("basemap-dark", {
+                type: "raster",
+                tiles: [
+                    "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                    "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                    "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                    "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                ],
+                tileSize: 256,
+            });
+
+            map.addLayer({
+                type: "raster",
+                id: "basemap-dark",
+                source: "basemap-dark",
+                layout: { visibility: state.baseLayer === "dark" ? "visible" : "none" },
+            });
+
+            map.addSource("basemap-light", {
+                type: "raster",
+                tiles: [
+                    "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                    "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                    "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                    "https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                ],
+                tileSize: 256,
+            });
+
+            map.addLayer({
+                type: "raster",
+                id: "basemap-light",
+                source: "basemap-light",
+                layout: { visibility: state.baseLayer === "light" ? "visible" : "none" },
+            });
+
+            setState("bounds", map.getBounds());
+        });
+
         map.on("moveend", () => setState("bounds", map.getBounds()));
     });
 
