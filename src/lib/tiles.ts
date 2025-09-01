@@ -1,9 +1,10 @@
 import { formatDateForUrl } from "./format-date";
 
-const MAX_TILES = 5000; // or estimate based on IndexedDB size
-const PURGE_THRESHOLD = 0.9; // start purging at 90% of max
+const BYTES_PER_TILE_EST = 1024;
+const USE_AVAILALBE_CACHE_FACTOR = 0.6;
 
 type TileKey = string;
+
 export type TileCoord = [number, number];
 
 interface TileGridOptions {
@@ -19,6 +20,7 @@ export class TileCache {
     private loadedTiles: Map<string, Map<string, Set<TileKey>>> = new Map();
     private opts: TileGridOptions;
     private lastUsed: Map<string, Map<string, Map<TileKey, number>>> = new Map();
+    private MAX_CACHE_BYTES = 50 * 1024 * 1024; // optional fallback 50MB
 
     constructor(opts: TileGridOptions) {
         this.opts = opts;
@@ -26,6 +28,18 @@ export class TileCache {
 
     private tileKey(x: number, y: number): TileKey {
         return `${x}:${y}`;
+    }
+
+    private async getAvailableQuota(): Promise<number> {
+        if (navigator.storage?.estimate) {
+            try {
+                const { quota, usage } = await navigator.storage.estimate();
+                return quota! - usage!;
+            } catch {
+                return this.MAX_CACHE_BYTES; // fallback
+            }
+        }
+        return this.MAX_CACHE_BYTES;
     }
 
     markTileLoaded(category: string, dateKey: string, x: number, y: number) {
@@ -134,30 +148,36 @@ export class TileCache {
         return tilesToFetch;
     }
 
-    public purgeIfNeeded() {
-        const allTiles: { category: string; dateKey: string; key: TileKey; lastUsed: number }[] = [];
+    // LRU purge
+    public async purgeIfNeeded() {
+        const available = await this.getAvailableQuota();
+        const tilesFlat: { category: string; dateKey: string; key: TileKey; lastUsed: number }[] = [];
 
         for (const [category, dateMap] of this.lastUsed) {
             for (const [dateKey, tileMap] of dateMap) {
                 for (const [key, timestamp] of tileMap) {
-                    allTiles.push({ category, dateKey, key, lastUsed: timestamp });
+                    tilesFlat.push({ category, dateKey, key, lastUsed: timestamp });
                 }
             }
         }
 
-        if (allTiles.length < MAX_TILES * PURGE_THRESHOLD) return;
+        const estimatedCacheBytes = tilesFlat.length * BYTES_PER_TILE_EST;
+        if (estimatedCacheBytes < available * 0.9) return;
 
-        // Sort tiles by oldest access
-        allTiles.sort((a, b) => a.lastUsed - b.lastUsed);
+        // Sort oldest first
+        tilesFlat.sort((a, b) => a.lastUsed - b.lastUsed);
 
-        // Remove oldest 10-20% (tune as needed)
-        const toRemove = allTiles.slice(0, Math.floor(allTiles.length * 0.2));
+        // Remove tiles until under n% of available quota
+        let freedBytes = 0;
+        const targetBytes = available * USE_AVAILALBE_CACHE_FACTOR;
+        for (const { category, dateKey, key } of tilesFlat) {
+            if (freedBytes + BYTES_PER_TILE_EST > estimatedCacheBytes - targetBytes) break;
 
-        for (const { category, dateKey, key } of toRemove) {
             this.loadedTiles.get(category)?.get(dateKey)?.delete(key);
             this.lastUsed.get(category)?.get(dateKey)?.delete(key);
+            freedBytes += BYTES_PER_TILE_EST;
         }
 
-        console.log(`Purged ${toRemove.length} tiles from cache`);
+        console.log(`Purged ${Math.floor(freedBytes / BYTES_PER_TILE_EST)} tiles to stay under quota`);
     }
 }
