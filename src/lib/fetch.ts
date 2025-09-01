@@ -1,3 +1,11 @@
+
+/*
+ * NB: 
+ *
+ * Latitude: 5 miles ≈ 5 / 69 ≈ 0.072 degrees
+ * Longitude: 5 miles ≈ 5 / 43 ≈ 0.116 degrees
+*/
+
 import pLimit from "p-limit";
 import { TileCache } from "./tiles";
 import type { Crime } from "./types";
@@ -6,14 +14,16 @@ import { formatDateForUrl } from "./format-date";
 
 type CrimeCallback = (crimes: Crime[]) => void;
 
-const limit = pLimit(10); // max concurrent requests
-const latLngPrecision = 6;
+const RETRIES = 3;
+const RETRY_DELAY_MS = 500;
+const MAX_CONCURRENT_REQUESTS = pLimit(10);
+const LAT_LNG_PRECISION = 6;
 
 async function fetchData(
     sw: [number, number],
     ne: [number, number],
     date: Date,
-    category: string = "burglary"
+    category: string = "violent-crime"
 ): Promise<Crime[]> {
     console.log("sw, ne", sw, ne);
     const nw: [number, number] = [ne[0], sw[1]];
@@ -35,11 +45,6 @@ async function fetchData(
     return crimes;
 }
 
-/*
- * Latitude: 5 miles ≈ 5 / 69 ≈ 0.072 degrees
- * Longitude: 5 miles ≈ 5 / 43 ≈ 0.116 degrees
-*/
-
 const tileCache = new TileCache({
     minLon: -180,
     minLat: -90,
@@ -47,6 +52,7 @@ const tileCache = new TileCache({
     tileWidth: 0.125,
 });
 
+await tileCache.initFromDb();
 
 export async function fetchDataForViewport(
     bounds: maplibregl.LngLatBounds,
@@ -54,21 +60,31 @@ export async function fetchDataForViewport(
     category: string = "violent-crime",
     onTileData?: CrimeCallback
 ): Promise<void> {
-    const minLon = Number(bounds.getWest().toFixed(latLngPrecision));
-    const minLat = Number(bounds.getSouth().toFixed(latLngPrecision));
-    const maxLon = Number(bounds.getEast().toFixed(latLngPrecision));
-    const maxLat = Number(bounds.getNorth().toFixed(latLngPrecision));
+    const minLon = Number(bounds.getWest().toFixed(LAT_LNG_PRECISION));
+    const minLat = Number(bounds.getSouth().toFixed(LAT_LNG_PRECISION));
+    const maxLon = Number(bounds.getEast().toFixed(LAT_LNG_PRECISION));
+    const maxLat = Number(bounds.getNorth().toFixed(LAT_LNG_PRECISION));
 
     const dateKey = formatDateForUrl(date);
 
     // Get all tiles covering the viewport
     const tilesInView = tileCache.getTilesInBBox(minLon, minLat, maxLon, maxLat);
 
+    // Immediately render cached tiles
+    for (const [tileX, tileY] of tilesInView) {
+        const cached = tileCache.getTileData(category, dateKey, tileX, tileY);
+        if (cached && onTileData) {
+            onTileData(cached);
+            tileCache.updateLruTimestamp(category, dateKey, tileX, tileY);
+        }
+    }
+
+    // Determine which tiles actually need fetching
     const tilesToFetch = tileCache.getTilesToFetchWithLruUpdate(category, dateKey, tilesInView);
 
-    // Fetch missing tiles in parallel with a limit
+    // Fetch missing tiles in parallel with a concurrency limit
     const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
-        limit(async () => {
+        MAX_CONCURRENT_REQUESTS(async () => {
             const tileBBox = tileCache.tileToBBox(tileX, tileY);
             const sw: [number, number] = [tileBBox.minLat, tileBBox.minLon];
             const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon];
@@ -76,12 +92,12 @@ export async function fetchDataForViewport(
             try {
                 const crimes = await retry(() =>
                     fetchData(sw, ne, date, category),
-                    3,
-                    500
+                    RETRIES,
+                    RETRY_DELAY_MS
                 );
 
                 if (crimes.length > 0) {
-                    tileCache.markTileLoaded(category, dateKey, tileX, tileY);
+                    await tileCache.markTileLoaded(category, dateKey, tileX, tileY, crimes);
 
                     if (onTileData) {
                         onTileData(crimes);
@@ -91,13 +107,8 @@ export async function fetchDataForViewport(
                 }
 
                 return crimes;
-            }
-
-            catch (err) {
-                console.warn(
-                    `Failed to fetch tile (${tileX}, ${tileY}), will retry later.`,
-                    err
-                );
+            } catch (err) {
+                console.warn(`Failed to fetch tile (${tileX}, ${tileY}), will retry later.`, err);
                 return [];
             }
         })
@@ -106,6 +117,6 @@ export async function fetchDataForViewport(
     try {
         await Promise.all(fetchPromises);
     } finally {
-        tileCache.purgeIfNeeded();
+        await tileCache.purgeIfNeeded();
     }
 }
