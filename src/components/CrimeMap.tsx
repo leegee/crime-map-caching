@@ -48,9 +48,9 @@ export default function CrimeMap() {
         if (!state.categories?.length) return;
 
         for (const category of state.categories) {
-            const lastKey = lastQuery[category];
+            const lastDateKey = lastQuery[category];
             const dateKey = state.date.toISOString().slice(0, 7); // YYYY-MM
-            const shouldClear = lastKey !== dateKey;
+            const shouldClear = lastDateKey !== dateKey;
 
             if (shouldClear) {
                 // Remove old features of this category for new month
