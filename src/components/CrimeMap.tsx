@@ -44,7 +44,7 @@ export default function CrimeMap() {
     createEffect(() => {
         if (!state.bounds) return;
 
-        setState('loading', false)
+        setState('loading', true)
 
         // Remove features whose categories are no longer selected
         crimeGeoJSON.features = crimeGeoJSON.features.filter(f =>
