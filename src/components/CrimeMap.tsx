@@ -4,20 +4,10 @@ import { createEffect, onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
+import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { setState, state } from "../store/api-ui";
 import { crimeCategories } from "../lib/categories";
-
-const circleColorExpression = ([
-    "match",
-    ["get", "category"],
-    ...Object.entries(crimeCategories).reduce<(string | string)[]>((acc, [key, { colour }]) => {
-        acc.push(key, colour);
-        return acc;
-    }, []),
-    "rgb(128,128,128)", // fallback
-] as unknown) as any;
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
@@ -44,7 +34,7 @@ export default function CrimeMap() {
     createEffect(() => {
         if (!state.bounds) return;
 
-        setState('loading', true)
+        setState("loading", true);
 
         // Remove features whose categories are no longer selected
         crimeGeoJSON.features = crimeGeoJSON.features.filter(f =>
@@ -96,50 +86,22 @@ export default function CrimeMap() {
         Promise.all(tilesToFetchPromises).catch(err => console.error(err));
 
         renderGeoJson();
-        setState('loading', false);
+        setState("loading", false);
     });
 
     function renderGeoJson() {
         if (!map) return;
+
         if (map.getSource("crimes")) {
             (map.getSource("crimes") as maplibregl.GeoJSONSource).setData(crimeGeoJSON);
-            // Update paint for current categories
-            map.setPaintProperty("crime-points", "circle-radius", [
-                "+",
-                5,
-                ["index-of", ["get", "category"], ["literal", state.categories ?? []]],
-            ]);
-        }
-        else {
-            const selectedCategories = state.categories ?? [];
 
-            map.addSource("crimes", { type: "geojson", data: crimeGeoJSON });
-            map.addLayer({
-                id: "crime-points",
-                type: "circle",
-                source: "crimes",
-                paint: {
-                    "circle-radius": [
-                        "+",
-                        5,
-                        ["index-of", ["get", "category"], ["literal", selectedCategories]],
-                    ], "circle-color": circleColorExpression
-                },
-            });
-
-            map.on("click", "crime-points", (e) => {
-                const feature = e.features![0];
-                const coordinates = (feature.geometry as GeoJSON.Point).coordinates;
-                new maplibregl.Popup()
-                    .setLngLat(coordinates as [number, number])
-                    .setHTML(`
-                        <div style="color: black; background: oldlace;">
-                        <p><strong>${feature.properties.category}</strong></p>
-                        <p>Outcome: ${feature.properties.outcome}</p>
-                        <p>Month: ${feature.properties.month}</p>
-                        </div>`
-                    ).addTo(map);
-            });
+            // Toggle visibility for each category layer
+            for (const category of Object.keys(crimeCategories) as CrimeCategory[]) {
+                const visible = state.categories?.includes(category) ? "visible" : "none";
+                if (map.getLayer(`crime-${category}`)) {
+                    map.setLayoutProperty(`crime-${category}`, "visibility", visible);
+                }
+            }
         }
     }
 
@@ -157,6 +119,7 @@ export default function CrimeMap() {
         });
 
         map.on("load", () => {
+            // Base maps
             map.addSource("basemap-dark", {
                 type: "raster",
                 tiles: [
@@ -192,6 +155,40 @@ export default function CrimeMap() {
                 source: "basemap-light",
                 layout: { visibility: state.baseLayer === "light" ? "visible" : "none" },
             });
+
+            // Crimes source
+            map.addSource("crimes", { type: "geojson", data: crimeGeoJSON });
+
+            // One layer per category
+            for (const [category, { colour }] of Object.entries(crimeCategories)) {
+                map.addLayer({
+                    id: `crime-${category}`,
+                    type: "circle",
+                    source: "crimes",
+                    filter: ["==", ["get", "category"], category],
+                    paint: {
+                        "circle-radius": 5,
+                        "circle-color": colour,
+                    },
+                    layout: {
+                        visibility: state.categories?.includes(category as CrimeCategory) ? "visible" : "none",
+                    },
+                });
+
+                map.on("click", `crime-${category}`, (e) => {
+                    const feature = e.features![0];
+                    const coordinates = (feature.geometry as GeoJSON.Point).coordinates;
+                    new maplibregl.Popup()
+                        .setLngLat(coordinates as [number, number])
+                        .setHTML(`
+                            <div style="color: black; background: oldlace;">
+                            <p><strong>${feature.properties.category}</strong></p>
+                            <p>Outcome: ${feature.properties.outcome}</p>
+                            <p>Month: ${feature.properties.month}</p>
+                            </div>`
+                        ).addTo(map);
+                });
+            }
 
             setState("bounds", map.getBounds());
         });
