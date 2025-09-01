@@ -1,5 +1,8 @@
 import { formatDateForUrl } from "./format-date";
 
+const MAX_TILES = 5000; // or estimate based on IndexedDB size
+const PURGE_THRESHOLD = 0.9; // start purging at 90% of max
+
 type TileKey = string;
 export type TileCoord = [number, number];
 
@@ -131,4 +134,30 @@ export class TileCache {
         return tilesToFetch;
     }
 
+    public purgeIfNeeded() {
+        const allTiles: { category: string; dateKey: string; key: TileKey; lastUsed: number }[] = [];
+
+        for (const [category, dateMap] of this.lastUsed) {
+            for (const [dateKey, tileMap] of dateMap) {
+                for (const [key, timestamp] of tileMap) {
+                    allTiles.push({ category, dateKey, key, lastUsed: timestamp });
+                }
+            }
+        }
+
+        if (allTiles.length < MAX_TILES * PURGE_THRESHOLD) return;
+
+        // Sort tiles by oldest access
+        allTiles.sort((a, b) => a.lastUsed - b.lastUsed);
+
+        // Remove oldest 10-20% (tune as needed)
+        const toRemove = allTiles.slice(0, Math.floor(allTiles.length * 0.2));
+
+        for (const { category, dateKey, key } of toRemove) {
+            this.loadedTiles.get(category)?.get(dateKey)?.delete(key);
+            this.lastUsed.get(category)?.get(dateKey)?.delete(key);
+        }
+
+        console.log(`Purged ${toRemove.length} tiles from cache`);
+    }
 }

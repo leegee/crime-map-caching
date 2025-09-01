@@ -103,5 +103,9 @@ export async function fetchDataForViewport(
         })
     );
 
-    await Promise.all(fetchPromises);
+    try {
+        await Promise.all(fetchPromises);
+    } finally {
+        tileCache.purgeIfNeeded();
+    }
 }
