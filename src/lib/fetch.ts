@@ -14,7 +14,7 @@ async function fetchData(
     category: string = "burglary"
 ): Promise<Crime[]> {
     try {
-        console.log('sw, ne', sw, ne);
+        console.log("sw, ne", sw, ne);
         const nw: [number, number] = [ne[0], sw[1]];
         const se: [number, number] = [sw[0], ne[1]];
 
@@ -38,33 +38,42 @@ async function fetchData(
 }
 
 /*
- * Latitude: 5 miles ≈ 5 / 69 ≈ 0.072°
- * Longitude: 5 miles ≈ 5 / 43 ≈ 0.116°
+ * Latitude: 5 miles ≈ 5 / 69 ≈ 0.072 degrees
+ * Longitude: 5 miles ≈ 5 / 43 ≈ 0.116 degrees
 */
 
 const tileCache = new TileCache({
     minLon: -180,
     minLat: -90,
-    tileWidth: 0.125,  // ~5 miles longitude in London
-    tileHeight: 0.072, // ~5 miles latitude
+    tileHeight: 0.072,
+    tileWidth: 0.125,
 });
 
-const formatDateForUrl = (date: Date): string => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+const formatDateForUrl = (date: Date): string =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
 export async function fetchDataForViewport(
     bounds: maplibregl.LngLatBounds,
     date: Date,
     category: string = "violent-crime",
-    onTileData?: CrimeCallback,
+    onTileData?: CrimeCallback
 ): Promise<void> {
     const minLon = Number(bounds.getWest().toFixed(latLngPrecision));
     const minLat = Number(bounds.getSouth().toFixed(latLngPrecision));
     const maxLon = Number(bounds.getEast().toFixed(latLngPrecision));
     const maxLat = Number(bounds.getNorth().toFixed(latLngPrecision));
 
-    const tilesToFetch = tileCache.getTilesToFetch(category, date, minLon, minLat, maxLon, maxLat);
+    const tilesToFetch = tileCache.getTilesToFetch(
+        category,
+        date,
+        minLon,
+        minLat,
+        maxLon,
+        maxLat
+    );
 
-    // Map tiles to limited fetch promises
+    const dateKey = formatDateForUrl(date);
+
     const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
         limit(async () => {
             const tileBBox = tileCache.tileToBBox(tileX, tileY);
@@ -72,10 +81,13 @@ export async function fetchDataForViewport(
             const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon];
 
             const crimes = await fetchData(sw, ne, date, category);
-            tileCache.markTileLoaded(category, date, tileX, tileY);
 
-            if (onTileData && crimes.length) {
-                onTileData(crimes);
+            if (crimes.length > 0) {
+                tileCache.markTileLoaded(category, dateKey, tileX, tileY);
+
+                if (onTileData) {
+                    onTileData(crimes);
+                }
             }
 
             return crimes;
