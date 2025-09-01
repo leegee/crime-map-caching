@@ -4,6 +4,7 @@ import { createEffect, onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
+import styles from './CrimeMap.module.scss';
 import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { setState, state } from "../store/api-ui";
@@ -115,8 +116,11 @@ export default function CrimeMap() {
                 sources: {},
                 layers: [],
             },
+            interactive: true,
             attributionControl: false,
         });
+
+        map.getCanvas().style.cursor = "default";
 
         map.on("load", () => {
             // Base maps
@@ -175,17 +179,24 @@ export default function CrimeMap() {
                     },
                 });
 
+                map.on("mouseenter", `crime-${category}`, () => {
+                    map.getCanvas().style.cursor = "pointer";
+                });
+                map.on("mouseleave", `crime-${category}`, () => {
+                    map.getCanvas().style.cursor = "default";
+                });
+
                 map.on("click", `crime-${category}`, (e) => {
                     const feature = e.features![0];
                     const coordinates = (feature.geometry as GeoJSON.Point).coordinates;
                     new maplibregl.Popup()
                         .setLngLat(coordinates as [number, number])
                         .setHTML(`
-                            <div style="color: black; background: oldlace;">
+                            <article class="primary-container">
                             <p><strong>${feature.properties.category}</strong></p>
                             <p>Outcome: ${feature.properties.outcome}</p>
                             <p>Month: ${feature.properties.month}</p>
-                            </div>`
+                            </article>`
                         ).addTo(map);
                 });
             }
@@ -196,5 +207,5 @@ export default function CrimeMap() {
         map.on("moveend", () => setState("bounds", map.getBounds()));
     });
 
-    return <section ref={mapContainer} style="width:100vw; height:100vh" ></section>;
+    return <div ref={mapContainer} class={styles["map-container"] + " " + styles[state.baseLayer]} ></div>
 }
