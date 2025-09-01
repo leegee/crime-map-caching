@@ -4,6 +4,6 @@ import { Show } from 'solid-js';
 
 export default function Loading() {
     return <Show when={state.loading}>
-        <div class={style.loading} />
-    </Show>
+        <progress class={style.loading + ' no-padding'}></progress>
+    </Show >
 }

@@ -3,9 +3,9 @@ import Loading from "./components/Loading";
 import Controls from "./components/controls";
 
 export default function App() {
-  return <main>
-    <Loading />
+  return <>
     <CrimeMap />
+    <Loading />
     <Controls />
-  </main>
+  </>
 }

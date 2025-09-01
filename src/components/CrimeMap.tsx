@@ -149,5 +149,5 @@ export default function CrimeMap() {
         map.on("moveend", () => setState("bounds", map.getBounds()));
     });
 
-    return <section ref={mapContainer} style="width:100vw;height:100vh;"></section>;
+    return <section ref={mapContainer} style="width:100vw; height:100vh" ></section>
 }

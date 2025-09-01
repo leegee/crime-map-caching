@@ -1,10 +1,11 @@
 import { CRIME_CATEGORIES } from "../../lib/types";
 import { setState, state } from "../../store/api-ui";
 
-export default function Category() {
+export default function CategorySelect() {
     return (
-        <div>
+        <div class="field row middle small-width">
             <select
+                class="input no-padding"
                 value={state.category}
                 onInput={e => setState("category", e.currentTarget.value as typeof CRIME_CATEGORIES[number])}
             >
@@ -12,10 +13,15 @@ export default function Category() {
                     <option value={category}>{category}</option>
                 ))}
             </select>
-            <input type="checkbox"
-                checked={state.clearOnCategoryChange}
-                onInput={(e) => setState("clearOnCategoryChange", e.currentTarget.checked)}
-            />
+
+            <label class="switch icon">
+                <input type="checkbox"
+                    checked={state.clearOnCategoryChange}
+                    onInput={(e) => setState("clearOnCategoryChange", e.currentTarget.checked)}
+                />
+                <span><i>delete</i></span>
+                <div class="tooltip right">Remove from the map the current date when changing category</div>
+            </label>
         </div>
     );
 }
