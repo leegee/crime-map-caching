@@ -149,6 +149,30 @@ export class TileCache {
         return tilesToFetch;
     }
 
+    deleteTile(category: string, dateKey: string, x: number, y: number) {
+        const key = this.tileKey(x, y);
+
+        // Remove from loadedTiles
+        const categoryMap = this.loadedTiles.get(category);
+        categoryMap?.get(dateKey)?.delete(key);
+        if (categoryMap?.get(dateKey)?.size === 0) {
+            categoryMap.delete(dateKey);
+        }
+        if (categoryMap?.size === 0) {
+            this.loadedTiles.delete(category);
+        }
+
+        // Remove from lastUsed
+        const lastUsedCategoryMap = this.lastUsed.get(category);
+        lastUsedCategoryMap?.get(dateKey)?.delete(key);
+        if (lastUsedCategoryMap?.get(dateKey)?.size === 0) {
+            lastUsedCategoryMap.delete(dateKey);
+        }
+        if (lastUsedCategoryMap?.size === 0) {
+            this.lastUsed.delete(category);
+        }
+    }
+
     // LRU purge
     public async purgeIfNeeded() {
         const available = await this.getAvailableQuota();
@@ -174,26 +198,12 @@ export class TileCache {
         for (const { category, dateKey, key } of tilesFlat) {
             if (freedBytes + BYTES_PER_TILE_EST > estimatedCacheBytes - targetBytes) break;
 
-            const dateSet = this.loadedTiles.get(category)?.get(dateKey);
-            const lastUsedMap = this.lastUsed.get(category)?.get(dateKey);
+            const [xStr, yStr] = key.split(":");
+            const x = parseInt(xStr, 10);
+            const y = parseInt(yStr, 10);
 
-            dateSet?.delete(key);
-            lastUsedMap?.delete(key);
+            this.deleteTile(category, dateKey, x, y);
             freedBytes += BYTES_PER_TILE_EST;
-
-            // 🧹 cleanup empty sets/maps
-            if (dateSet && dateSet.size === 0) {
-                this.loadedTiles.get(category)?.delete(dateKey);
-            }
-            if (lastUsedMap && lastUsedMap.size === 0) {
-                this.lastUsed.get(category)?.delete(dateKey);
-            }
-            if (this.loadedTiles.get(category)?.size === 0) {
-                this.loadedTiles.delete(category);
-            }
-            if (this.lastUsed.get(category)?.size === 0) {
-                this.lastUsed.delete(category);
-            }
         }
 
         console.log(`Purged ${Math.floor(freedBytes / BYTES_PER_TILE_EST)} tiles to stay under quota`);
