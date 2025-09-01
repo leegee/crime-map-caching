@@ -1,5 +1,5 @@
 import pLimit from "p-limit";
-import { TileCache, type TileCoord } from "./tiles";
+import { TileCache } from "./tiles";
 import type { Crime } from "./types";
 import { retry } from "./retry";
 import { formatDateForUrl } from "./format-date";
