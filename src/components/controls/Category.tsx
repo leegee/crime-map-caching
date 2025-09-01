@@ -6,8 +6,12 @@ export default function CategorySelect() {
         <div class="field row middle small-width">
             <select
                 class="input no-padding"
-                value={state.category}
-                onInput={e => setState("category", e.currentTarget.value as typeof CRIME_CATEGORIES[number])}
+                multiple
+                value={state.categories} // array of selected categories
+                onInput={e => {
+                    const selected = Array.from(e.currentTarget.selectedOptions).map(opt => opt.value as typeof CRIME_CATEGORIES[number]);
+                    setState("categories", selected);
+                }}
             >
                 {CRIME_CATEGORIES.map(category => (
                     <option value={category}>{category}</option>

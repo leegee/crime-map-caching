@@ -3,7 +3,7 @@ import type { CrimeCategory } from "../lib/types";
 
 type StoreState = {
     date: Date;
-    category: CrimeCategory;
+    categories: CrimeCategory[];
     clearOnDateChange: boolean;
     clearOnCategoryChange: boolean;
     bounds: maplibregl.LngLatBounds | null;
@@ -19,7 +19,7 @@ const defaultDate = (): Date => {
 export const [state, setState] = createStore<StoreState>({
     date: defaultDate(),
     clearOnDateChange: true,
-    category: "violent-crime",
+    categories: ["violent-crime"],
     clearOnCategoryChange: true,
     bounds: null,
     loading: false,

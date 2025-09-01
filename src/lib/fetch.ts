@@ -7,7 +7,7 @@
 */
 
 import pLimit from "p-limit";
-import { TileCache } from "./tiles";
+import { TileCache } from "./TileCache";
 import type { Crime } from "./types";
 import { retry } from "./retry";
 import { formatDateForUrl } from "./format-date";
@@ -72,7 +72,7 @@ export async function fetchDataForViewport(
 
     // Immediately render cached tiles
     for (const [tileX, tileY] of tilesInView) {
-        const cached = tileCache.getTileData(category, dateKey, tileX, tileY);
+        const cached = tileCache.getTileGeoJSON(category, dateKey, tileX, tileY);
         if (cached && onTileData) {
             onTileData(cached);
             tileCache.updateLruTimestamp(category, dateKey, tileX, tileY);

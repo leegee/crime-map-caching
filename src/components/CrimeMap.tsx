@@ -4,7 +4,7 @@ import { createEffect, onMount } from "solid-js";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory } from "../lib/types";
+import type { CrimeFeatureCollection, CrimeFeature } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { setState, state } from "../store/api-ui";
 import { crimeCategories } from "../lib/categories";
@@ -17,7 +17,7 @@ const circleColorExpression = ([
         return acc;
     }, []),
     "rgb(128,128,128)", // fallback
-] as unknown) as any; // auch aye
+] as unknown) as any;
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
@@ -28,53 +28,55 @@ export default function CrimeMap() {
     };
 
     let map: maplibregl.Map;
-    let lastQueryDate: Date | null = null;
-    let lastQueryCategory: CrimeCategory | null = null;
+
+    // Keep track of last queries per category
+    let lastQuery: Record<string, string> = {};
 
     createEffect(() => {
-        if (!state.bounds) return;
+        if (!state.bounds || !state.categories?.length) return;
 
-        let lastQueryDateLocal = lastQueryDate;
-        let lastQueryCategoryLocal = lastQueryCategory;
+        const tilesToFetchPromises: Promise<void>[] = [];
 
-        const dateChanged = !lastQueryDateLocal || lastQueryDateLocal.getTime() !== state.date.getTime();
-        const categoryChanged = !lastQueryCategoryLocal || lastQueryCategoryLocal !== state.category;
+        for (const category of state.categories) {
+            const lastKey = lastQuery[category];
+            const dateKey = state.date.toISOString().slice(0, 7); // YYYY-MM
+            const shouldClear =
+                state.clearOnCategoryChange && lastKey !== dateKey;
 
-        const shouldClear =
-            (state.clearOnDateChange && dateChanged) ||
-            (state.clearOnCategoryChange && categoryChanged);
+            if (shouldClear) {
+                // Remove old features of this category
+                crimeGeoJSON.features = crimeGeoJSON.features.filter(f => f.properties?.category !== category);
+                lastQuery[category] = dateKey;
+                renderGeoJson();
+            }
 
-        if (shouldClear) {
-            crimeGeoJSON.features = [];
-            lastQueryDate = state.date;
-            lastQueryCategory = state.category;
-            renderGeoJson();
+            // Fetch tiles for this category
+            tilesToFetchPromises.push(
+                fetchDataForViewport(state.bounds, state.date, category, (newCrimes) => {
+                    const newFeatures: CrimeFeature[] = newCrimes.map((crime) => ({
+                        type: "Feature",
+                        geometry: {
+                            type: "Point",
+                            coordinates: [
+                                parseFloat(crime.location.longitude),
+                                parseFloat(crime.location.latitude),
+                            ],
+                        },
+                        properties: {
+                            category: crime.category,
+                            outcome: crime.outcome_status?.category || "Unknown",
+                            month: crime.month,
+                        },
+                    }));
+
+                    crimeGeoJSON.features.push(...newFeatures);
+                    renderGeoJson();
+                })
+            );
         }
 
-        // Fetch tiles and render each as received progressively
-        fetchDataForViewport(state.bounds, state.date, state.category, (newCrimes) => {
-            setState('loading', true);
-            const newFeatures: CrimeFeature[] = newCrimes.map((crime) => ({
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [
-                        parseFloat(crime.location.longitude),
-                        parseFloat(crime.location.latitude),
-                    ],
-                },
-                properties: {
-                    category: crime.category,
-                    outcome: crime.outcome_status?.category || "Unknown",
-                    month: crime.month,
-                },
-            }));
-
-            crimeGeoJSON.features.push(...newFeatures);
-            renderGeoJson();
-        })
-            .then(() => setState('loading', false))
-            .catch(err => console.error("Error fetching crimes:", err));
+        // Trigger all fetches in parallel
+        Promise.all(tilesToFetchPromises).catch(err => console.error(err));
     });
 
     function renderGeoJson() {
@@ -100,9 +102,9 @@ export default function CrimeMap() {
                     .setLngLat(coordinates as [number, number])
                     .setHTML(`
             <div style="color: black; background: oldlace;">
-                <p><strong>${feature.properties.category}</strong></p>
-                <p>Outcome: ${feature.properties.outcome}</p>
-                <p>Month: ${feature.properties.month}</p>
+              <p><strong>${feature.properties.category}</strong></p>
+              <p>Outcome: ${feature.properties.outcome}</p>
+              <p>Month: ${feature.properties.month}</p>
             </div>
           `)
                     .addTo(map);
@@ -144,12 +146,9 @@ export default function CrimeMap() {
             attributionControl: false,
         });
 
-        // map.on('load', updateDataInBounds);
-        // map.on("moveend", updateDataInBounds);
-
-        map.on('load', () => setState("bounds", map.getBounds()));
+        map.on("load", () => setState("bounds", map.getBounds()));
         map.on("moveend", () => setState("bounds", map.getBounds()));
     });
 
-    return <section ref={mapContainer} style="width:100vw; height:100vh" ></section>
+    return <section ref={mapContainer} style="width:100vw; height:100vh" ></section>;
 }
