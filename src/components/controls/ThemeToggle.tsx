@@ -7,7 +7,7 @@ export default function ThemeToggle() {
                 <input
                     type="checkbox"
                     checked={state.baseLayer === "light"}
-                    onInput={e => setState("baseLayer", state.baseLayer === 'dark' ? "light" : "dark")}
+                    onInput={() => setState("baseLayer", state.baseLayer === 'dark' ? "light" : "dark")}
                 />
                 <span>
                     &nbsp;
