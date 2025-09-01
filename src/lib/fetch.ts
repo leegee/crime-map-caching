@@ -1,7 +1,8 @@
 import pLimit from "p-limit";
-import { TileCache } from "./tiles";
+import { TileCache, type TileCoord } from "./tiles";
 import type { Crime } from "./types";
 import { retry } from "./retry";
+import { formatDateForUrl } from "./format-date";
 
 type CrimeCallback = (crimes: Crime[]) => void;
 
@@ -46,8 +47,6 @@ const tileCache = new TileCache({
     tileWidth: 0.125,
 });
 
-const formatDateForUrl = (date: Date): string =>
-    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
 export async function fetchDataForViewport(
     bounds: maplibregl.LngLatBounds,
@@ -60,17 +59,22 @@ export async function fetchDataForViewport(
     const maxLon = Number(bounds.getEast().toFixed(latLngPrecision));
     const maxLat = Number(bounds.getNorth().toFixed(latLngPrecision));
 
-    const tilesToFetch = tileCache.getTilesToFetch(
-        category,
-        date,
-        minLon,
-        minLat,
-        maxLon,
-        maxLat
-    );
-
     const dateKey = formatDateForUrl(date);
 
+    // Get all tiles covering the viewport
+    const tilesInView = tileCache.getTilesInBBox(minLon, minLat, maxLon, maxLat);
+
+    const tilesToFetch: TileCoord[] = [];
+
+    for (const [x, y] of tilesInView) {
+        if (tileCache.isTileLoaded(category, dateKey, x, y)) {
+            tileCache.updateLruTimestamp(category, dateKey, x, y);
+        } else {
+            tilesToFetch.push([x, y]);
+        }
+    }
+
+    // Fetch missing tiles in parallel with a limit
     const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
         limit(async () => {
             const tileBBox = tileCache.tileToBBox(tileX, tileY);
@@ -84,7 +88,6 @@ export async function fetchDataForViewport(
                     500
                 );
 
-
                 if (crimes.length > 0) {
                     tileCache.markTileLoaded(category, dateKey, tileX, tileY);
 
@@ -92,15 +95,15 @@ export async function fetchDataForViewport(
                         onTileData(crimes);
                     }
                 } else {
-                    console.log('No data for', tileX, tileY)
+                    console.log("No data for tile", tileX, tileY);
                 }
 
                 return crimes;
-
-            }
-
-            catch (err) {
-                console.warn(`Failed to fetch tile (${tileX}, ${tileY}), will retry later.`, err);
+            } catch (err) {
+                console.warn(
+                    `Failed to fetch tile (${tileX}, ${tileY}), will retry later.`,
+                    err
+                );
                 return [];
             }
         })
