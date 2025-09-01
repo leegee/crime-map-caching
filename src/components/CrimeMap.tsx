@@ -103,7 +103,14 @@ export default function CrimeMap() {
         if (!map) return;
         if (map.getSource("crimes")) {
             (map.getSource("crimes") as maplibregl.GeoJSONSource).setData(crimeGeoJSON);
-        } else {
+            // Update paint for current categories
+            map.setPaintProperty("crime-points", "circle-radius", [
+                "+",
+                5,
+                ["index-of", ["get", "category"], ["literal", state.categories ?? []]],
+            ]);
+        }
+        else {
             const selectedCategories = state.categories ?? [];
 
             map.addSource("crimes", { type: "geojson", data: crimeGeoJSON });
@@ -112,8 +119,6 @@ export default function CrimeMap() {
                 type: "circle",
                 source: "crimes",
                 paint: {
-                    // "circle-radius": 5,
-                    // "circle-color": circleColorExpression,
                     "circle-radius": [
                         "+",
                         5,
