@@ -10,8 +10,8 @@ export default function Controls() {
     const toggle = () => setExpanded(!expanded());
 
     return (
-        <div class='top left' style="z-index: 100; position: absolute">
-            <nav class={"m l left no-margin " + (expanded() ? 'medium-width' : 'auto')}>
+        <div class='top left' style="z-index: 100; position: absolute; height: 100%">
+            <nav class={"m l left no-margin " + (expanded() ? 'medium-width' : 'auto')} style="position: relative; height: 100%; overflow: auto">
                 <header class="row items-center">
                     <button class="circle transparent" onclick={toggle}>
                         <i>menu</i>
