@@ -96,7 +96,7 @@ export default function CrimeMap() {
         Promise.all(tilesToFetchPromises).catch(err => console.error(err));
 
         renderGeoJson();
-        setState('loading', true);
+        setState('loading', false);
     });
 
     function renderGeoJson() {
