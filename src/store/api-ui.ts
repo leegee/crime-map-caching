@@ -12,7 +12,7 @@ type StoreState = {
 
 const defaultDate = (): Date => {
     const now = new Date();
-    const latestMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    const latestMonth = new Date(now.getFullYear(), now.getMonth() - 3, 1);
     return new Date(latestMonth.getFullYear(), latestMonth.getMonth(), 1);
 };
 

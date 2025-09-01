@@ -1,6 +1,7 @@
 import pLimit from "p-limit";
 import { TileCache } from "./tiles";
 import type { Crime } from "./types";
+import { retry } from "./retry";
 
 type CrimeCallback = (crimes: Crime[]) => void;
 
@@ -24,6 +25,7 @@ async function fetchData(
     let url = `https://data.police.uk/api/crimes-street/${category}?poly=${poly}`;
     if (date) url += `&date=${formatDateForUrl(date)}`;
     console.log("Fetching crimes from URL:", url);
+    console.log("Date", formatDateForUrl(date));
 
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP error - status: ${res.status}`);
@@ -76,7 +78,12 @@ export async function fetchDataForViewport(
             const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon];
 
             try {
-                const crimes = await fetchData(sw, ne, date, category);
+                const crimes = await retry(() =>
+                    fetchData(sw, ne, date, category),
+                    3,
+                    500
+                );
+
 
                 if (crimes.length > 0) {
                     tileCache.markTileLoaded(category, dateKey, tileX, tileY);
@@ -84,6 +91,8 @@ export async function fetchDataForViewport(
                     if (onTileData) {
                         onTileData(crimes);
                     }
+                } else {
+                    console.log('No data for', tileX, tileY)
                 }
 
                 return crimes;
