@@ -13,28 +13,23 @@ async function fetchData(
     date: Date,
     category: string = "burglary"
 ): Promise<Crime[]> {
-    try {
-        console.log("sw, ne", sw, ne);
-        const nw: [number, number] = [ne[0], sw[1]];
-        const se: [number, number] = [sw[0], ne[1]];
+    console.log("sw, ne", sw, ne);
+    const nw: [number, number] = [ne[0], sw[1]];
+    const se: [number, number] = [sw[0], ne[1]];
 
-        const poly = [sw, nw, ne, se, sw]
-            .map(([lat, lng]) => `${lat},${lng}`)
-            .join(":");
+    const poly = [sw, nw, ne, se, sw]
+        .map(([lat, lng]) => `${lat},${lng}`)
+        .join(":");
 
-        let url = `https://data.police.uk/api/crimes-street/${category}?poly=${poly}`;
-        if (date) url += `&date=${formatDateForUrl(date)}`;
-        console.log("Fetching crimes from URL:", url);
+    let url = `https://data.police.uk/api/crimes-street/${category}?poly=${poly}`;
+    if (date) url += `&date=${formatDateForUrl(date)}`;
+    console.log("Fetching crimes from URL:", url);
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP error - status: ${res.status}`);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP error - status: ${res.status}`);
 
-        const crimes: Crime[] = await res.json();
-        return crimes;
-    } catch (err) {
-        console.error("Error fetching crimes:", err);
-        return [];
-    }
+    const crimes: Crime[] = await res.json();
+    return crimes;
 }
 
 /*
