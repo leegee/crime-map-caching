@@ -1,6 +1,6 @@
 import { createSignal, Show, } from "solid-js";
-import Category from './Category';
-import Date from './Date';
+import Category from './components/controls/Category';
+import Date from './components/controls/Date';
 
 export default function Controls() {
     const [expanded, setExpanded] = createSignal(true);
@@ -14,6 +14,9 @@ export default function Controls() {
                     >
                         <i>menu</i>
                     </button>
+                    <Show when={expanded()}>
+                        Police API Visualisation
+                    </Show>
                 </header>
 
                 <div class="menu-item row">
