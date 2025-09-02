@@ -94,8 +94,10 @@ export async function fetchDataForViewport(
                     RETRY_DELAY_MS
                 );
 
-                await tileCache.markTileLoaded(category, dateKey, tileX, tileY, crimes);
-                if (onTileData) onTileData(crimes);
+                if (crimes.length) {
+                    await tileCache.markTileLoaded(category, dateKey, tileX, tileY, crimes);
+                    if (onTileData) onTileData(crimes);
+                }
                 return crimes;
             }
 
