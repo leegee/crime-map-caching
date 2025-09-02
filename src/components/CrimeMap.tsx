@@ -192,7 +192,7 @@ export default function CrimeMap() {
                     new maplibregl.Popup()
                         .setLngLat(coordinates as [number, number])
                         .setHTML(`
-                            <article class="primary-container">
+                            <article class="primary-container no-elevate">
                             <p><strong>${feature.properties.category}</strong></p>
                             <p>Outcome: ${feature.properties.outcome}</p>
                             <p>Month: ${feature.properties.month}</p>

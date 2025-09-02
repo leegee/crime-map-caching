@@ -12,5 +12,10 @@
             border-top-color: var(--primary-container) !important;
             border-bottom-color: var(--primary-container) !important;
         }
+
+        :global(.maplibregl-popup-close-button) {
+            color: var(--on-primary-container) !important;
+            padding: 4pt;
+        }
     }
 }
