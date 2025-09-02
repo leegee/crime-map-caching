@@ -111,4 +111,13 @@ export const courtDisposals = {
         description: "Status update unavailable",
         colour: "rgb(128, 128, 128)", // grey
     },
+    unknown: {
+        description: "Outcome unknown",
+        colour: "rgb(128, 128, 128)", // grey
+    }
 };
+
+export const outcomeDescriptionToKey = Object.fromEntries(
+    Object.entries(courtDisposals).map(([key, { description }]) => [description, key])
+);
+
