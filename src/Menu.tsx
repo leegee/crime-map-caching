@@ -3,6 +3,7 @@ import Category from './components/controls/Category';
 import Date from './components/controls/Date';
 import ThemeToggle from "./components/controls/ThemeToggle";
 import { state } from "./store/api-ui";
+import LabelsToggle from "./components/controls/LabelsToggle";
 
 export default function Controls() {
     const [expanded, setExpanded] = createSignal(true);
@@ -20,6 +21,13 @@ export default function Controls() {
                         Police API Crime Visualisation
                     </Show>
                 </header>
+
+                <div class="menu-item row">
+                    <span class="small-padding" onclick={toggle}><i>label</i></span>
+                    <Show when={expanded()}>
+                        <LabelsToggle />
+                    </Show>
+                </div>
 
                 <div class="menu-item row">
                     <span class="small-padding" onclick={toggle}>

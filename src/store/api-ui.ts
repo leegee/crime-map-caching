@@ -8,6 +8,7 @@ type StoreState = {
     bounds: maplibregl.LngLatBounds | null;
     loading: boolean;
     baseLayer: "dark" | "light";
+    showLabels: boolean;
 };
 
 const defaultDate = (): Date => {
@@ -23,5 +24,6 @@ export const [state, setState] = createStore<StoreState>({
     bounds: null,
     loading: false,
     baseLayer: 'dark',
+    showLabels: false,
 });
 
