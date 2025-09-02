@@ -15,3 +15,14 @@
     max-width: 3em !important;
     min-inline-size: 3em !important;
 }
+
+.menu-item {
+    display: none !important;
+    align-items: flex-start !important;
+    flex: 1 1 auto !important;
+    height: 100vh !important;
+}
+
+.category-row {
+    align-items: flex-start;
+}

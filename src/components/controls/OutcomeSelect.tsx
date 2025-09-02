@@ -2,9 +2,9 @@ import { crimeCategories } from "../../lib/categories";
 import { CRIME_CATEGORIES } from "../../lib/types";
 import { setState, state } from "../../store/api-ui";
 
-export default function CategorySelect() {
+export default function OutcomeSelect() {
     return (
-        <div class="column small-width">
+        <div class="field column small-width">
             {CRIME_CATEGORIES.map(category => (
                 <label class="switch middle">
                     <input

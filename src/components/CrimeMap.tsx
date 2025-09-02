@@ -1,7 +1,7 @@
 /* @refresh reset */
 
 import { createEffect, onMount } from "solid-js";
-import maplibregl from "maplibre-gl";
+import maplibregl, { type ExpressionSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import styles from './CrimeMap.module.scss';
@@ -9,6 +9,16 @@ import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory } from "../lib
 import { fetchDataForViewport } from "../lib/fetch";
 import { crimeCategories } from "../lib/categories";
 import { setState, state } from "../store/api-ui";
+import { courtDisposals } from "../lib/outcomes";
+
+function buildOutcomeStrokeExpression(): ExpressionSpecification {
+    return [
+        "match",
+        ["get", "outcome"],
+        ...Object.entries(courtDisposals).flatMap(([key, { colour }]) => [key, colour]),
+        "#888" // fallback colour
+    ] as unknown as ExpressionSpecification;
+}
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
@@ -216,6 +226,8 @@ export default function CrimeMap() {
                     paint: {
                         "circle-radius": 5,
                         "circle-color": colour,
+                        "circle-stroke-color": buildOutcomeStrokeExpression(),
+                        "circle-stroke-width": 2,
                     },
                     layout: {
                         visibility: state.categories?.includes(category as CrimeCategory) ? "visible" : "none",

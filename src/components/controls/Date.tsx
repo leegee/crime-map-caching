@@ -2,9 +2,9 @@ import { setState, state } from "../../store/api-ui";
 
 export default function DateInput() {
     return (
-        <div class="field row middle small-width">
+        <div class="field row">
             <input
-                class="input no-padding"
+                class="no-padding"
                 type="month"
                 value={`${state.date.getFullYear()}-${String(state.date.getMonth() + 1).padStart(2, "0")}`}
                 onInput={(e) => {
@@ -20,7 +20,7 @@ export default function DateInput() {
                     onInput={(e) => setState("clearOnDateChange", e.currentTarget.checked)}
                 />
                 <span><i>delete</i></span>
-                <div class="tooltip right">Remove from the map the current data when changing date</div>
+                <div class="tooltip left">Remove from the map <br />the current data when changing date</div>
             </label>
         </div>
     );

@@ -22,12 +22,12 @@ export default function Menu() {
                     Police API Crime Visualisation
                 </header>
 
-                <div class="menu-item row">
+                <div class="row">
                     <span class="small-padding" onclick={toggle}><i>label</i></span>
                     <LabelsToggle />
                 </div>
 
-                <div class="menu-item row">
+                <div class="row">
                     <span class="small-padding" onclick={toggle}>
                         <Switch>
                             <Match when={state.baseLayer === 'light'}>
@@ -41,17 +41,44 @@ export default function Menu() {
                     <ThemeToggle />
                 </div>
 
-                <div class="menu-item row">
+                <div class="row">
                     <span class="small-padding" onclick={toggle}><i>calendar_month</i></span>
                     <Date />
                 </div>
 
-                <div class="menu-item row">
+                <div class={"row " + style["category-row"]}>
                     <span class="small-padding" onclick={toggle}><i>category</i></span>
-                    <Category />
+                    <details>
+                        <summary class="no-elevate">
+                            <article class="no-padding no-elevate">
+                                <nav>
+                                    <div class="small-padding max">Crime Categories</div>
+                                    <i>expand_more</i>
+                                </nav>
+                            </article>
+                        </summary>
+                        <Category />
+                    </details>
                 </div>
 
-                <div class="menu-item row bottom" style='margin-top: auto'>
+                <div class={"row " + style["category-row"]}>
+                    <span class="small-padding" onclick={toggle}><i>category</i></span>
+                    <details>
+                        <summary class="no-elevate">
+                            <article class="no-padding no-elevate">
+                                <nav>
+                                    <div class="small-padding max">Crime Categories</div>
+                                    <i>expand_more</i>
+                                </nav>
+                            </article>
+                        </summary>
+                        <Category />
+                    </details>
+                </div>
+
+                <hr class="small" />
+
+                <div class="row bottom" style='margin-top: auto'>
                     <span class="small-padding" onclick={toggle}><i>copyright</i></span>
                     <Attributions />
                 </div>
