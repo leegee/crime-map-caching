@@ -1,6 +1,6 @@
 /* @refresh reset */
 
-import { createEffect, onMount } from "solid-js";
+import { createEffect, createSignal, onMount } from "solid-js";
 import maplibregl, { type ExpressionSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -22,7 +22,7 @@ function buildOutcomeStrokeExpression(): ExpressionSpecification {
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
-    let mapLoaded = false;
+    const [mapLoaded, setMapLoaded] = createSignal(false);
 
     const crimeGeoJSON: CrimeFeatureCollection = {
         type: "FeatureCollection",
@@ -37,11 +37,26 @@ export default function CrimeMap() {
     // Light/dark basemap toggle
     createEffect(() => {
         const showLabels = state.showLabels;
-        if (state.baseLayer && mapLoaded) {
+        if (state.baseLayer && mapLoaded()) {
             map.setLayoutProperty("basemap-layer-dark", "visibility", state.baseLayer === "dark" ? "visible" : "none");
             map.setLayoutProperty("basemap-layer-light", "visibility", state.baseLayer === "light" ? "visible" : "none");
             map.setLayoutProperty("basemap-layer-dark-labels", "visibility", state.baseLayer === "dark" && showLabels ? "visible" : "none");
             map.setLayoutProperty("basemap-layer-light-labels", "visibility", state.baseLayer === "light" && showLabels ? "visible" : "none");
+        }
+    });
+
+
+    // When outcomes/court disposal filters are applied, update the way the mapped circles are painted
+    createEffect(() => {
+        if (!state.outcomes || !mapLoaded()) return;
+        const strokeColor = state.outcomes.length ? buildOutcomeStrokeExpression() : "rgba(0,0,0,0)";
+        const strokeWidth = state.outcomes.length ? 5 : 0;
+
+        for (const category of Object.keys(crimeCategories) as CrimeCategory[]) {
+            if (map.getLayer(`crime-${category}`)) {
+                map.setPaintProperty(`crime-${category}`, "circle-stroke-color", strokeColor);
+                map.setPaintProperty(`crime-${category}`, "circle-stroke-width", strokeWidth);
+            }
         }
     });
 
@@ -276,7 +291,7 @@ export default function CrimeMap() {
             }
 
             setState("bounds", map.getBounds());
-            mapLoaded = true;
+            setMapLoaded(true);
         });
 
         map.on("moveend", () => setState("bounds", map.getBounds()));

@@ -49,7 +49,7 @@ export default function Menu() {
 
                 <div class={"row " + style["category-row"]}>
                     <span class="small-padding" onclick={toggle}><i>category</i></span>
-                    <details>
+                    <details open>
                         <summary class="no-elevate">
                             <article class="no-padding no-elevate">
                                 <nav>
