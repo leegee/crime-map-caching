@@ -12,6 +12,7 @@ import { setState, state } from "../store/api-ui";
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
+    let mapLoaded = false;
 
     const crimeGeoJSON: CrimeFeatureCollection = {
         type: "FeatureCollection",
@@ -25,9 +26,9 @@ export default function CrimeMap() {
 
     // Light/dark basemap toggle
     createEffect(() => {
-        if (map && map.getLayer("basemap-dark") && map.getLayer("basemap-light")) {
-            map.setLayoutProperty("basemap-dark", "visibility", state.baseLayer === "dark" ? "visible" : "none");
-            map.setLayoutProperty("basemap-light", "visibility", state.baseLayer === "light" ? "visible" : "none");
+        if (state.baseLayer && mapLoaded) {
+            map.setLayoutProperty("basemap-layer-dark", "visibility", state.baseLayer === "dark" ? "visible" : "none");
+            map.setLayoutProperty("basemap-layer-light", "visibility", state.baseLayer === "light" ? "visible" : "none");
         }
     });
 
@@ -137,7 +138,7 @@ export default function CrimeMap() {
 
             map.addLayer({
                 type: "raster",
-                id: "basemap-dark",
+                id: "basemap-layer-dark",
                 source: "basemap-dark",
                 layout: { visibility: state.baseLayer === "dark" ? "visible" : "none" },
             });
@@ -155,7 +156,7 @@ export default function CrimeMap() {
 
             map.addLayer({
                 type: "raster",
-                id: "basemap-light",
+                id: "basemap-layer-light",
                 source: "basemap-light",
                 layout: { visibility: state.baseLayer === "light" ? "visible" : "none" },
             });
@@ -202,6 +203,7 @@ export default function CrimeMap() {
             }
 
             setState("bounds", map.getBounds());
+            mapLoaded = true;
         });
 
         map.on("moveend", () => setState("bounds", map.getBounds()));
