@@ -4,7 +4,7 @@ import { setState, state } from "../../store/api-ui";
 
 export default function CategorySelect() {
     return (
-        <div class="field column small-width ">
+        <div class="field column small-width">
             {CRIME_CATEGORIES.map(category => (
                 <label class="switch middle">
                     <input
@@ -18,9 +18,15 @@ export default function CategorySelect() {
                             setState("categories", updated);
                         }}
                     />
-                    <span>&nbsp;{crimeCategories[category].description}</span>
+                    <span
+                        style={"color:" + crimeCategories[category].colour}
+                    >
+                        &nbsp;
+                        {crimeCategories[category].description}
+                    </span>
                 </label>
-            ))}
-        </div>
+            ))
+            }
+        </div >
     );
 }

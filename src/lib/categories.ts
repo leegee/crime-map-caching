@@ -29,7 +29,7 @@ export const crimeCategories = {
     },
     "possession-of-weapons": {
         description: "Possession of weapons",
-        colour: "rgb(153, 0, 0)", // dark red
+        colour: "rgb(219, 69, 69)", // dark red
     },
     "public-order": {
         description: "Public order",
