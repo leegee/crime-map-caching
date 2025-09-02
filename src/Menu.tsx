@@ -1,10 +1,11 @@
 import { createSignal, Match, Switch, } from "solid-js";
 import style from './Menu.module.scss';
+import { state } from "./store/api-ui";
 import Category from './components/controls/Category';
 import Date from './components/controls/Date';
 import ThemeToggle from "./components/controls/ThemeToggle";
-import { state } from "./store/api-ui";
 import LabelsToggle from "./components/controls/LabelsToggle";
+import Attributions from "./components/Attributions";
 
 export default function Menu() {
     const [expanded, setExpanded] = createSignal(true);
@@ -50,6 +51,10 @@ export default function Menu() {
                     <Category />
                 </div>
 
+                <div class="menu-item row bottom" style='margin-top: auto'>
+                    <span class="small-padding" onclick={toggle}><i>copyright</i></span>
+                    <Attributions />
+                </div>
 
             </nav>
         </div >

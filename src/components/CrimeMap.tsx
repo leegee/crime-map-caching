@@ -168,10 +168,11 @@ export default function CrimeMap() {
             map.addSource("basemap-light", {
                 type: "raster",
                 tiles: [
-                    "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
-                    "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
-                    "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
-                    "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+                    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    // "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+                    // "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+                    // "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+                    // "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
                 ],
                 tileSize: 256,
             });
