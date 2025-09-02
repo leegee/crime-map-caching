@@ -7,8 +7,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import styles from './CrimeMap.module.scss';
 import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
-import { setState, state } from "../store/api-ui";
 import { crimeCategories } from "../lib/categories";
+import { setState, state } from "../store/api-ui";
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
@@ -193,7 +193,7 @@ export default function CrimeMap() {
                         .setLngLat(coordinates as [number, number])
                         .setHTML(`
                             <article class="primary-container no-elevate">
-                            <p><strong>${feature.properties.category}</strong></p>
+                            <p><strong>${crimeCategories[feature.properties.category as CrimeCategory].description}</strong></p>
                             <p>Outcome: ${feature.properties.outcome}</p>
                             <p>Month: ${feature.properties.month}</p>
                             </article>`
