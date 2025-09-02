@@ -36,7 +36,7 @@ export default function CrimeMap() {
     });
 
     // Re-render on state change - category, date, bounds
-    createEffect(() => {
+    createEffect(async () => {
         if (!state.bounds) return;
 
         // Remove features whose categories are no longer selected
@@ -88,9 +88,10 @@ export default function CrimeMap() {
             );
         }
 
-        Promise.all(tilesToFetchPromises).catch(err => console.error(err));
+        await Promise.all(tilesToFetchPromises).catch(err => console.error(err));
 
         renderGeoJson();
+
         setState("loading", false);
     });
 
