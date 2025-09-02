@@ -1,0 +1,17 @@
+.container {
+    z-index: 100;
+    position: absolute;
+    height: 100%;
+}
+
+.nav {
+    position: relative;
+    height: 100%;
+    overflow: auto;
+}
+
+.nav-small {
+    overflow: hidden;
+    max-width: 3em !important;
+    min-inline-size: 3em !important;
+}

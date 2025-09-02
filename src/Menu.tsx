@@ -1,32 +1,29 @@
-import { createSignal, Match, Show, Switch, } from "solid-js";
+import { createSignal, Match, Switch, } from "solid-js";
+import style from './Menu.module.scss';
 import Category from './components/controls/Category';
 import Date from './components/controls/Date';
 import ThemeToggle from "./components/controls/ThemeToggle";
 import { state } from "./store/api-ui";
 import LabelsToggle from "./components/controls/LabelsToggle";
 
-export default function Controls() {
+export default function Menu() {
     const [expanded, setExpanded] = createSignal(true);
 
     const toggle = () => setExpanded(!expanded());
 
     return (
-        <div class='top left' style="z-index: 100; position: absolute; height: 100%">
-            <nav class={"m l left no-margin " + (expanded() ? 'medium-width' : 'auto')} style="position: relative; height: 100%; overflow: auto">
+        <div class={'top left ' + style.container}>
+            <nav class={style.nav + " m l left no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
                 <header class="row items-center">
                     <button class="circle transparent" onclick={toggle}>
                         <i>menu</i>
                     </button>
-                    <Show when={expanded()}>
-                        Police API Crime Visualisation
-                    </Show>
+                    Police API Crime Visualisation
                 </header>
 
                 <div class="menu-item row">
                     <span class="small-padding" onclick={toggle}><i>label</i></span>
-                    <Show when={expanded()}>
-                        <LabelsToggle />
-                    </Show>
+                    <LabelsToggle />
                 </div>
 
                 <div class="menu-item row">
@@ -40,23 +37,17 @@ export default function Controls() {
                             </Match>
                         </Switch>
                     </span>
-                    <Show when={expanded()}>
-                        <ThemeToggle />
-                    </Show>
+                    <ThemeToggle />
                 </div>
 
                 <div class="menu-item row">
                     <span class="small-padding" onclick={toggle}><i>calendar_month</i></span>
-                    <Show when={expanded()}>
-                        <Date />
-                    </Show>
+                    <Date />
                 </div>
 
                 <div class="menu-item row">
                     <span class="small-padding" onclick={toggle}><i>category</i></span>
-                    <Show when={expanded()}>
-                        <Category />
-                    </Show>
+                    <Category />
                 </div>
 
 
