@@ -94,18 +94,12 @@ export async function fetchDataForViewport(
                     RETRY_DELAY_MS
                 );
 
-                if (crimes.length > 0) {
-                    await tileCache.markTileLoaded(category, dateKey, tileX, tileY, crimes);
-
-                    if (onTileData) {
-                        onTileData(crimes);
-                    }
-                } else {
-                    console.log("No data for tile", tileX, tileY);
-                }
-
+                await tileCache.markTileLoaded(category, dateKey, tileX, tileY, crimes);
+                if (onTileData) onTileData(crimes);
                 return crimes;
-            } catch (err) {
+            }
+
+            catch (err) {
                 console.warn(`Failed to fetch tile (${tileX}, ${tileY}), will retry later.`, err);
                 return [];
             }
