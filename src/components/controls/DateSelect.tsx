@@ -1,6 +1,6 @@
 import { setState, state } from "../../store/api-ui";
 
-export default function DateInput() {
+export default function DateSelect() {
     return (
         <div class="field row">
             <input

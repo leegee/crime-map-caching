@@ -9,7 +9,7 @@ import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory } from "../lib
 import { fetchDataForViewport } from "../lib/fetch";
 import { crimeCategories } from "../lib/categories";
 import { setState, state } from "../store/api-ui";
-import { courtDisposals } from "../lib/outcomes";
+import { courtDisposals } from "../lib/court-disposals";
 
 function buildOutcomeStrokeExpression(): ExpressionSpecification {
     return [

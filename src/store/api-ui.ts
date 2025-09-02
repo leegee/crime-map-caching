@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import type { CrimeCategory } from "../lib/types";
+import type { CrimeCategory, CrimeOutcome } from "../lib/types";
 
 type StoreState = {
     date: Date;
@@ -9,6 +9,7 @@ type StoreState = {
     loading: boolean;
     baseLayer: "dark" | "light";
     showLabels: boolean;
+    outcomes: CrimeOutcome[],
 };
 
 const defaultDate = (): Date => {
@@ -25,5 +26,6 @@ export const [state, setState] = createStore<StoreState>({
     loading: false,
     baseLayer: 'dark',
     showLabels: false,
+    outcomes: [],
 });
 

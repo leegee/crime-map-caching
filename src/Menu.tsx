@@ -1,11 +1,12 @@
 import { createSignal, Match, Switch, } from "solid-js";
 import style from './Menu.module.scss';
 import { state } from "./store/api-ui";
-import Category from './components/controls/Category';
-import Date from './components/controls/Date';
+import CategorySelect from './components/controls/CategorySelect';
+import DateSelect from './components/controls/DateSelect';
 import ThemeToggle from "./components/controls/ThemeToggle";
 import LabelsToggle from "./components/controls/LabelsToggle";
 import Attributions from "./components/Attributions";
+import OutcomeSelect from "./components/controls/DisposalSelect";
 
 export default function Menu() {
     const [expanded, setExpanded] = createSignal(true);
@@ -43,7 +44,7 @@ export default function Menu() {
 
                 <div class="row">
                     <span class="small-padding" onclick={toggle}><i>calendar_month</i></span>
-                    <Date />
+                    <DateSelect />
                 </div>
 
                 <div class={"row " + style["category-row"]}>
@@ -57,22 +58,22 @@ export default function Menu() {
                                 </nav>
                             </article>
                         </summary>
-                        <Category />
+                        <CategorySelect />
                     </details>
                 </div>
 
                 <div class={"row " + style["category-row"]}>
-                    <span class="small-padding" onclick={toggle}><i>category</i></span>
+                    <span class="small-padding" onclick={toggle}><i>gavel</i></span>
                     <details>
                         <summary class="no-elevate">
                             <article class="no-padding no-elevate">
                                 <nav>
-                                    <div class="small-padding max">Crime Categories</div>
+                                    <div class="small-padding max">Court Disposals</div>
                                     <i>expand_more</i>
                                 </nav>
                             </article>
                         </summary>
-                        <Category />
+                        <OutcomeSelect />
                     </details>
                 </div>
 
