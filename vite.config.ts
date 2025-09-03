@@ -1,15 +1,56 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type PreviewServer, type ViteDevServer } from 'vite'
 import solid from 'vite-plugin-solid'
 import solidSvg from "vite-plugin-solid-svg";
 import { VitePWA } from 'vite-plugin-pwa';
+import qr from "qrcode-terminal";
 
 import packageJson from './package.json';
+
+function qrCodePlugin() {
+  return {
+    name: "vite-plugin-qrcode",
+    configureServer(server: ViteDevServer) {
+      server.httpServer?.once("listening", () => {
+        const info = server.resolvedUrls;
+        if (!info) return;
+
+        const url = info.network[0];
+        if (!url) return;
+
+        console.log("\nScan this QR code to open the dev server:\n");
+        qr.generate(url, { small: true });
+        console.log(`\n${url}\n`);
+      });
+    },
+    configurePreviewServer(server: PreviewServer) {
+      server.httpServer?.once("listening", () => {
+        const info = server.resolvedUrls;
+        if (!info) return;
+
+        const url = info.network[0] || info.local[0];
+        if (!url) return;
+
+        console.log("\nScan this QR code to open the preview server:\n");
+        qr.generate(url, { small: true });
+        console.log(`\n${url}\n`);
+      });
+    },
+  };
+}
 
 export default defineConfig({
   base: `/${packageJson.name}/`,
 
+  server: {
+    host: true,
+  },
+  preview: {
+    host: true,
+  },
+
   plugins: [
     solid(),
+    qrCodePlugin(),
     solidSvg({
       svgo: { enabled: true },
     }),
@@ -53,3 +94,4 @@ export default defineConfig({
 
   ],
 })
+
