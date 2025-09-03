@@ -7,7 +7,6 @@ import os from 'os';
 
 import packageJson from './package.json';
 
-// Utility: pick a LAN IPv4 address
 function getLANAddress(): string {
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {
@@ -20,8 +19,7 @@ function getLANAddress(): string {
   return '127.0.0.1';
 }
 
-// QR code plugin
-function qrCodePlugin(includeLabels: boolean) {
+function qrCodePlugin() {
   const printQR = (url: string, label: string) => {
     console.log(`\nScan this QR code to open the ${label} server:\n`);
     qr.generate(url, { small: true });
@@ -29,8 +27,6 @@ function qrCodePlugin(includeLabels: boolean) {
   };
 
   const handleServer = (server: ViteDevServer | PreviewServer, label: string) => {
-    if (!includeLabels) return;
-
     const httpServer = server.httpServer;
     if (!httpServer) return;
 
@@ -68,7 +64,7 @@ export default defineConfig({
   base: `/${packageJson.name}/`,
 
   define: {
-    __INC_LABELS__: true, // toggle QR printing
+    __INC_LABELS__: true, // Include map labels
   },
 
   server: { host: true },
@@ -77,7 +73,7 @@ export default defineConfig({
   plugins: [
     solid(),
     solidSvg({ svgo: { enabled: true } }),
-    qrCodePlugin(true), // will print QR codes
+    qrCodePlugin(true),
 
     VitePWA({
       registerType: 'autoUpdate',
