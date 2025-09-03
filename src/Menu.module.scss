@@ -18,6 +18,12 @@
     min-inline-size: 3em !important;
 }
 
+.first-row {
+    background: black !important;
+    z-index: 10;
+    width: 100%;
+}
+
 .menu-item {
     display: none !important;
     align-items: flex-start !important;

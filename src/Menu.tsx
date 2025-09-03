@@ -28,17 +28,19 @@ export default function Menu() {
 
                 <Match when={expanded()}>
                     <nav class={style.nav + " left no-padding no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
-                        <div class="row no-padding">
+                        <div class={"row no-padding fixed top-0 " + style['first-row']}>
                             <button class="transparent small-padding small" onClick={toggle}>
                                 <i>close</i>
                             </button>
 
-                            <h4 class="small middle small-padding">
+                            <h4 class="small  small-padding">
                                 Police Crime API
                             </h4>
 
                             <Attributions size="small" />
                         </div>
+
+                        <div style="height: 32pt"></div>
 
 
                         <div class="row">
