@@ -12,6 +12,8 @@ import type { Crime } from "./types";
 import { retry } from "./retry";
 import { formatDateForUrl } from "./format-date";
 
+const ongoingTileRequests = new Map<string, AbortController>();
+
 type CrimeCallback = (crimes: Crime[]) => void;
 
 const RETRIES = 3;
@@ -23,7 +25,8 @@ async function fetchData(
     sw: [number, number],
     ne: [number, number],
     date: Date,
-    category: string = "violent-crime"
+    category: string = "violent-crime",
+    signal?: AbortSignal
 ): Promise<Crime[]> {
     const nw: [number, number] = [ne[0], sw[1]];
     const se: [number, number] = [sw[0], ne[1]];
@@ -36,7 +39,7 @@ async function fetchData(
     if (date) url += `&date=${formatDateForUrl(date)}`;
     console.log("Fetching crimes from URL:", url);
 
-    const res = await fetch(url);
+    const res = await fetch(url, { signal });
     if (!res.ok) throw new Error(`HTTP error - status: ${res.status}`);
 
     const crimes: Crime[] = await res.json();
@@ -52,6 +55,7 @@ const tileCache = new TileCache({
 
 await tileCache.initFromDb();
 
+
 export async function fetchDataForViewport(
     bounds: maplibregl.LngLatBounds,
     date: Date,
@@ -64,46 +68,67 @@ export async function fetchDataForViewport(
     const maxLat = Number(bounds.getNorth().toFixed(LAT_LNG_PRECISION));
 
     const dateKey = formatDateForUrl(date);
-
-    // Get all tiles covering the viewport
     const tilesInView = tileCache.getTilesInBBox(minLon, minLat, maxLon, maxLat);
 
-    // Immediately render cached tiles
+    const tilesInViewKeys = new Set(
+        tilesInView.map(([x, y]) => `${category}-${dateKey}-${x}-${y}`)
+    );
+
+    // Abort tiles no longer in view
+    for (const [tileKey, controller] of ongoingTileRequests.entries()) {
+        if (!tilesInViewKeys.has(tileKey)) {
+            controller.abort();
+            ongoingTileRequests.delete(tileKey);
+        }
+    }
+
+    // Render cached tiles once
+    const renderedTiles = new Set<string>();
     for (const [tileX, tileY] of tilesInView) {
+        const tileKey = `${category}-${dateKey}-${tileX}-${tileY}`;
+        if (renderedTiles.has(tileKey)) continue;
+
         const cached = tileCache.getTileGeoJSON(category, dateKey, tileX, tileY);
         if (cached && onTileData) {
             onTileData(cached);
+            renderedTiles.add(tileKey);
             tileCache.updateLruTimestamp(category, dateKey, tileX, tileY);
         }
     }
 
-    // Determine which tiles actually need fetching
-    const tilesToFetch = tileCache.getTilesToFetchWithLruUpdate(category, dateKey, tilesInView);
+    // Fetch missing tiles
+    const tilesToFetch = tileCache.getTilesToFetchWithLruUpdate(category, dateKey, tilesInView)
+        .filter(([x, y]) => !ongoingTileRequests.has(`${category}-${dateKey}-${x}-${y}`));
 
-    // Fetch missing tiles in parallel with a concurrency limit
     const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
         MAX_CONCURRENT_REQUESTS(async () => {
+            const tileKey = `${category}-${dateKey}-${tileX}-${tileY}`;
+            const controller = new AbortController();
+            ongoingTileRequests.set(tileKey, controller);
+
             const tileBBox = tileCache.tileToBBox(tileX, tileY);
             const sw: [number, number] = [tileBBox.minLat, tileBBox.minLon];
             const ne: [number, number] = [tileBBox.maxLat, tileBBox.maxLon];
 
             try {
-                const crimes = await retry(() =>
-                    fetchData(sw, ne, date, category),
+                const crimes = await retry(
+                    () => fetchData(sw, ne, date, category, controller.signal),
                     RETRIES,
                     RETRY_DELAY_MS
                 );
 
-                if (crimes.length) {
+                if (crimes.length && onTileData) {
                     await tileCache.markTileLoaded(category, dateKey, tileX, tileY, crimes);
-                    if (onTileData) onTileData(crimes);
+                    onTileData(crimes);
                 }
-                return crimes;
-            }
-
-            catch (err) {
-                console.warn(`Failed to fetch tile (${tileX}, ${tileY}), will retry later.`, err);
-                return [];
+            } catch (err) {
+                if ((err as any).name === "AbortError") {
+                    console.log(`Tile fetch aborted: ${tileKey}`);
+                } else {
+                    console.warn(`Failed to fetch tile (${tileX}, ${tileY})`, err);
+                }
+            } finally {
+                ongoingTileRequests.delete(tileKey);
             }
         })
     );
@@ -114,3 +139,4 @@ export async function fetchDataForViewport(
         await tileCache.purgeIfNeeded();
     }
 }
+
