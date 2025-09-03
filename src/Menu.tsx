@@ -16,81 +16,93 @@ export default function Menu() {
 
     return (
         <div class={'top left ' + style.container}>
-            <nav class={style.nav + " left no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
-                <header class="row items-center">
-                    <button class="circle transparent" onclick={toggle}>
-                        <i>menu</i>
-                    </button>
-                    Police API Crime Visualisation
-                </header>
 
-                <div class="row">
-                    <span class="small-padding" onclick={toggle}><i>search</i></span>
-                    <GeoCode />
-                </div>
+            <Switch>
+                <Match when={!expanded()}>
+                    <div class="top-padding">
+                        <button onclick={toggle}>
+                            <i>menu</i>
+                        </button>
+                    </div>
+                </Match>
 
-                <div class="row">
-                    <span class="small-padding" onclick={toggle}><i>label</i></span>
-                    <LabelsToggle />
-                </div>
+                <Match when={expanded()}>
+                    <nav class={style.nav + " left no-padding no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
+                        <div class="row no-padding">
+                            <button class="transparent small-padding large" onclick={toggle}><i>close</i></button>
+                            <h4 class="small">Police Crime API</h4>
+                        </div>
 
-                <div class="row">
-                    <span class="small-padding" onclick={toggle}>
-                        <Switch>
-                            <Match when={state.baseLayer === 'light'}>
-                                <i>dark_mode</i>
-                            </Match>
-                            <Match when={state.baseLayer === 'dark'}>
-                                <i>light_mode</i>
-                            </Match>
-                        </Switch>
-                    </span>
-                    <ThemeToggle />
-                </div>
+                        <div class="row">
+                            <span class="small-padding" onclick={toggle}><i>search</i></span>
+                            <GeoCode />
+                        </div>
 
-                <div class="row">
-                    <span class="small-padding" onclick={toggle}><i>calendar_month</i></span>
-                    <DateSelect />
-                </div>
+                        <div class="row">
+                            <span class="small-padding" onclick={toggle}><i>label</i></span>
+                            <LabelsToggle />
+                        </div>
 
-                <div class={"row " + style["category-row"]}>
-                    <span class="small-padding" onclick={toggle}><i>category</i></span>
-                    <details open>
-                        <summary class="no-elevate">
-                            <article class="no-padding no-elevate">
-                                <nav>
-                                    <div class="small-padding max">Crime Categories</div>
-                                    <i>expand_more</i>
-                                </nav>
-                            </article>
-                        </summary>
-                        <CategorySelect />
-                    </details>
-                </div>
+                        <div class="row">
+                            <span class="small-padding" onclick={toggle}>
+                                <Switch>
+                                    <Match when={state.baseLayer === 'light'}>
+                                        <i>dark_mode</i>
+                                    </Match>
+                                    <Match when={state.baseLayer === 'dark'}>
+                                        <i>light_mode</i>
+                                    </Match>
+                                </Switch>
+                            </span>
+                            <ThemeToggle />
+                        </div>
 
-                <div class={"row " + style["category-row"]}>
-                    <span class="small-padding" onclick={toggle}><i>gavel</i></span>
-                    <details>
-                        <summary class="no-elevate">
-                            <article class="no-padding no-elevate">
-                                <nav>
-                                    <div class="small-padding max">Court Disposals</div>
-                                    <i>expand_more</i>
-                                </nav>
-                            </article>
-                        </summary>
-                        <OutcomeSelect />
-                    </details>
-                </div>
+                        <div class="row">
+                            <span class="small-padding" onclick={toggle}><i>calendar_month</i></span>
+                            <DateSelect />
+                        </div>
 
-                <hr class="small" />
+                        <div class={"row " + style["category-row"]}>
+                            <span class="small-padding" onclick={toggle}><i>category</i></span>
+                            <details open>
+                                <summary class="no-elevate">
+                                    <article class="no-padding no-elevate">
+                                        <nav>
+                                            <div class="small-padding max">Crime Categories</div>
+                                            <i>expand_more</i>
+                                        </nav>
+                                    </article>
+                                </summary>
+                                <CategorySelect />
+                            </details>
+                        </div>
 
-                <div class="row bottom" style='margin-top: auto'>
-                    <span class="small-padding" onclick={toggle}><i>copyright</i></span>
-                    <Attributions />
-                </div>
+                        <div class={"row " + style["category-row"]}>
+                            <span class="small-padding" onclick={toggle}><i>gavel</i></span>
+                            <details>
+                                <summary class="no-elevate">
+                                    <article class="no-padding no-elevate">
+                                        <nav>
+                                            <div class="small-padding max">Court Disposals</div>
+                                            <i>expand_more</i>
+                                        </nav>
+                                    </article>
+                                </summary>
+                                <OutcomeSelect />
+                            </details>
+                        </div>
 
-            </nav>
+                        <hr class="small" />
+
+                        <div class="row bottom" style='margin-top: auto'>
+                            <span class="small-padding" onclick={toggle}><i>copyright</i></span>
+                            <Attributions />
+                        </div>
+                    </nav>
+
+                </Match>
+            </Switch>
+
         </div >
     );
 }
