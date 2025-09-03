@@ -4,7 +4,7 @@ export default function ThemeToggle() {
     return (
         <div class="field row middle">
             <label class="switch">
-                <input
+                <input name="map-theme"
                     type="checkbox"
                     checked={state.baseLayer === "light"}
                     onInput={() => setState("baseLayer", state.baseLayer === 'dark' ? "light" : "dark")}

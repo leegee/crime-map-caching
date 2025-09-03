@@ -84,7 +84,8 @@ export default function GeocodeForm() {
 
             <nav class="no-space">
                 <div class="max field border left-round small">
-                    <input
+                    <input name="address"
+                        autocomplete="true"
                         class="input small"
                         type="text"
                         placeholder="Enter address or postcode"

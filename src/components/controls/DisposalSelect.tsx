@@ -8,7 +8,7 @@ export default function OutcomeSelect() {
         <div class="small-width top-padding">
             {outcomeKeys.map(outcome => (
                 <label class="switch middle">
-                    <input
+                    <input name="crime-disposal"
                         type="checkbox"
                         checked={state.outcomes?.includes(outcome)}
                         onInput={e => {

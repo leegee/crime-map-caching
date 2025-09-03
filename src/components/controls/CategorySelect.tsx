@@ -7,7 +7,7 @@ export default function CategorySelect() {
         <div class="column small-width top-padding">
             {CRIME_CATEGORIES.map(category => (
                 <label class="switch middle">
-                    <input
+                    <input name="crime-category"
                         type="checkbox"
                         checked={state.categories.includes(category)}
                         onInput={e => {

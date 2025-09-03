@@ -4,7 +4,7 @@ export default function LabelsToggle() {
     return (
         <div class="field row middle">
             <label class="switch">
-                <input
+                <input name="map-labels"
                     type="checkbox"
                     checked={state.showLabels}
                     onInput={() => setState("showLabels", !state.showLabels)}

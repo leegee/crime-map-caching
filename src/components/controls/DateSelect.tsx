@@ -3,7 +3,7 @@ import { setState, state } from "../../store/api-ui";
 export default function DateSelect() {
     return (
         <div class="field row max">
-            <input
+            <input name="crime-month"
                 class="no-padding"
                 type="month"
                 value={`${state.date.getFullYear()}-${String(state.date.getMonth() + 1).padStart(2, "0")}`}
@@ -13,7 +13,7 @@ export default function DateSelect() {
                 }}
             />
             {/* <label class="switch icon">
-                <input
+                <input name="crime-delete"
                     type="checkbox"
                     checked={state.clearOnDateChange}
                     onInput={(e) => setState("clearOnDateChange", e.currentTarget.checked)}
