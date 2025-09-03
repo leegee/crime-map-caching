@@ -162,6 +162,7 @@ export default function CrimeMap() {
             zoom: 14,
             style: {
                 version: 8,
+                glyphs: "fonts/{fontstack}/{range}.pbf",
                 sources: {},
                 layers: [],
             },
