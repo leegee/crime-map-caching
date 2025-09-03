@@ -30,6 +30,8 @@ function buildOutcomeStrokeExpression(): ExpressionSpecification {
 
 export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
+    let popup: maplibregl.Popup | null = null;
+
     const [mapLoaded, setMapLoaded] = createSignal(false);
 
     const crimeGeoJSON: CrimeFeatureCollection = {
@@ -71,6 +73,8 @@ export default function CrimeMap() {
     // Re-render on state change - category, date, bounds
     createEffect(async () => {
         if (!state.bounds) return;
+
+        if (popup) popup.remove();
 
         // Filters:
 
@@ -125,6 +129,8 @@ export default function CrimeMap() {
                                 outcome: outcomeDesc || "Unknown",   // human-readable
                                 outcomeKey,                          // stable key
                                 month: crime.month,
+                                streetName: crime.location.street.name,
+                                context: crime.context,
                             },
                         };
                     });
@@ -302,14 +308,32 @@ export default function CrimeMap() {
                 map.on("click", `crime-${category}`, (e) => {
                     const feature = e.features![0];
                     const coordinates = (feature.geometry as GeoJSON.Point).coordinates;
-                    new maplibregl.Popup()
+                    popup = new maplibregl.Popup({
+                        closeOnClick: true,
+                        closeButton: false,
+                    })
                         .setLngLat(coordinates as [number, number])
                         .setHTML(`
-                            <article class="primary-container no-elevate">
-                            <p><strong>${crimeCategories[feature.properties.category as CrimeCategory].description}</strong></p>
-                            <p>Outcome: ${feature.properties.outcome}</p>
-                            <p>Month: ${feature.properties.month}</p>
-                            </article>`
+                            <article class="primary-container no-elevate no-padding">
+                                <table>
+                                        <tr>
+                                            <th>Street</th>
+                                            <td>${feature.properties.streetName}</td>
+                                        </tr><tr>
+                                            <th>Category</th>
+                                            <td>${crimeCategories[feature.properties.category as CrimeCategory].description}</td>
+                                        </tr><tr>
+                                            <th>Outcome</th>
+                                            <td>${feature.properties.outcome}</td>
+                                        </tr><tr>
+                                            <th>Month</th>
+                                            <td>${feature.properties.month}</td>
+                                        </tr><tr>
+                                            <th>Context</th>
+                                            <td>${feature.properties.context || 'None provided'}</td>
+                                        </tr>
+                                    </table>
+                                </article>`
                         ).addTo(map);
                 });
             }

@@ -2,6 +2,10 @@
     width: 100vw;
     height: 100vh;
 
+    :global(.maplibregl-popup-content) {
+        min-width: 30em;
+    }
+
     &.dark {
         :global(.maplibregl-popup-content) {
             background-color: var(--primary-container) !important;
@@ -11,11 +15,6 @@
         :global(.maplibregl-popup-tip) {
             border-top-color: var(--primary-container) !important;
             border-bottom-color: var(--primary-container) !important;
-        }
-
-        :global(.maplibregl-popup-close-button) {
-            color: var(--on-primary-container) !important;
-            padding: 4pt;
         }
     }
 }

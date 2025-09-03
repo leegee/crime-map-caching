@@ -13,14 +13,14 @@ export default function DateSelect() {
                 }}
             />
             {/* <label class="switch icon">
-                <input name="crime-delete"
-                    type="checkbox"
-                    checked={state.clearOnDateChange}
-                    onInput={(e) => setState("clearOnDateChange", e.currentTarget.checked)}
-                />
-                <span><i>delete</i></span>
-                <div class="tooltip left">Remove from the map <br />the current data when changing date</div>
-            </label> */}
+            <input name="crime-delete"
+                type="checkbox"
+                checked={state.clearOnDateChange}
+                onInput={(e) => setState("clearOnDateChange", e.currentTarget.checked)}
+            />
+            <span><i>delete</i></span>
+            <div class="tooltip left">Remove from the map <br />the current data when changing date</div>
+        </label> */}
         </div>
     );
 }

@@ -13,7 +13,15 @@ export type Crime = {
     id: string;
     category: string;
     outcome_status?: { category: string };
-    location: { latitude: string; longitude: string };
+    location: {
+        latitude: string;
+        longitude: string;
+        street: {
+            name: string;
+            id: number;
+        };
+    };
+    context: string;
     month: string;
 };
 
