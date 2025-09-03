@@ -10,7 +10,7 @@
     "build": "tsc -b && vite build",
     "deploy": "tsc -b && vite build && gh-pages -d dist",
     "preview": "vite preview",
-    "generate-icons": "pwa-asset-generator src/logo.png public/icons --manifest public/manifest.json --background '#000000'"
+    "generate-icons": "pwa-asset-generator src/assets/logo.png public/icons --background '#000000'"
   },
   "dependencies": {
     "@types/maplibre-gl": "^1.14.0",
