@@ -12,7 +12,6 @@ export default function DateSelect() {
                     setState("date", new Date(year, month - 1, 1) as Date);
                 }}
             />
-
             <label class="switch icon">
                 <input
                     type="checkbox"

@@ -16,6 +16,11 @@ export default function Attributions() {
                 <h5>Credits</h5>
                 <div class="small">
                     <p>
+                        <em>
+                            The current and previous month may not yet be available.
+                        </em>
+                    </p>
+                    <p>
                         Data thanks to <a href='https://data.police.uk/docs/' target='_blank'>The Police API</a>.
                     </p>
                     <p>
