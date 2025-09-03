@@ -8,6 +8,7 @@ import Attributions from "./components/Attributions";
 import OutcomeSelect from "./components/controls/DisposalSelect";
 import GeoCode from "./components/controls/GeoCode";
 import LabelsToggle from "./components/controls/LabelsToggle";
+import OutcomesToggleAll from "./components/controls/DisposalToggleAll";
 
 export default function Menu() {
     const [expanded, setExpanded] = createSignal(true);
@@ -94,10 +95,14 @@ export default function Menu() {
                             <details>
                                 <summary class="no-elevate">
                                     <article class="no-padding no-elevate">
-                                        <nav>
-                                            <div class="small-padding max">Court Disposals</div>
+                                        <nav class="flex items-center small-padding max">
+                                            Court Disposals
+                                            <div style="margin-left: 0.5em;">
+                                            </div>
                                             <i>expand_more</i>
+                                            <OutcomesToggleAll />
                                         </nav>
+
                                     </article>
                                 </summary>
                                 <OutcomeSelect />
