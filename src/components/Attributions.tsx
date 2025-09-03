@@ -1,3 +1,5 @@
+import packageJson from '../../package.json';
+
 export default function Attributions() {
     let dialogRef: HTMLDialogElement | undefined;
 
@@ -36,12 +38,13 @@ export default function Attributions() {
                         Geocoding thanks to <a href="https://nominatim.openstreetmap.org" target="_blank">OpenStreetMap Nominatim</a>.
                     </p>
                     <p>
-                        Coded by <a href='https://lee.goddards.space'>Lee</a>.
+                        Coded by <a href='https://lee.goddards.space'>Lee</a>. Version {packageJson.version}.
+                        <a href={packageJson.homepage}>Github</a>
                     </p>
                 </div>
 
                 <nav class="right-align no-space">
-                    <button class="transparent link" onClick={closeDialog}>
+                    <button class="primary small" onClick={closeDialog}>
                         Close
                     </button>
                 </nav>
