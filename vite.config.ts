@@ -73,7 +73,7 @@ export default defineConfig({
   plugins: [
     solid(),
     solidSvg({ svgo: { enabled: true } }),
-    qrCodePlugin(true),
+    qrCodePlugin(),
 
     VitePWA({
       registerType: 'autoUpdate',
