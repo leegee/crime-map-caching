@@ -64,7 +64,7 @@ export default defineConfig({
   base: `/${packageJson.name}/`,
 
   define: {
-    __INC_LABELS__: true, // Include map labels
+    __INC_LABELS__: false, // Include map labels
   },
 
   server: { host: true },
