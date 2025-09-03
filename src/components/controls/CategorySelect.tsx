@@ -18,7 +18,7 @@ export default function CategorySelect() {
                             setState("categories", updated);
                         }}
                     />
-                    <span style={"color:" + crimeCategories[category].colour} >
+                    <span style={{ color: crimeCategories[category].colour }}>
                         &nbsp;
                         {crimeCategories[category].description}
                     </span>
