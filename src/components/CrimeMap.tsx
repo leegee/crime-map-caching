@@ -62,7 +62,7 @@ export default function CrimeMap() {
 
     // Re-render on state change - category, date, bounds
     createEffect(async () => {
-        if (!state.bounds) return;
+        if (!state.bounds || !state.categories?.length) return;
 
         // Filters:
 
@@ -80,8 +80,6 @@ export default function CrimeMap() {
         renderGeoJson();
 
         const tilesToFetchPromises: Promise<void>[] = [];
-
-        if (!state.categories?.length) return;
 
         setState("loading", true);
 
@@ -249,7 +247,10 @@ export default function CrimeMap() {
             });
 
             // Crimes source
-            map.addSource("crimes", { type: "geojson", data: crimeGeoJSON });
+            map.addSource("crimes", {
+                type: "geojson",
+                data: crimeGeoJSON,
+            });
 
             // One layer per category
             for (const [category, { colour }] of Object.entries(crimeCategories)) {
