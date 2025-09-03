@@ -62,7 +62,7 @@ export default function CrimeMap() {
 
     // Re-render on state change - category, date, bounds
     createEffect(async () => {
-        if (!state.bounds || !state.categories?.length) return;
+        if (!state.bounds) return;
 
         // Filters:
 
@@ -80,6 +80,8 @@ export default function CrimeMap() {
         renderGeoJson();
 
         const tilesToFetchPromises: Promise<void>[] = [];
+
+        if (!state.categories?.length) return;
 
         setState("loading", true);
 
