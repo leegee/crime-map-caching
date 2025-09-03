@@ -1,6 +1,6 @@
 /* @refresh reset */
 
-import { createEffect, createSignal, onMount } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import maplibregl, { type ExpressionSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -10,6 +10,7 @@ import { fetchDataForViewport } from "../lib/fetch";
 import { crimeCategories } from "../lib/categories";
 import { setState, state } from "../store/api-ui";
 import { courtDisposals, outcomeDescriptionToKey } from "../lib/court-disposals";
+import type { GeocodeEventDetail } from "./controls/GeoCode";
 
 function buildOutcomeStrokeExpression(): ExpressionSpecification {
     return [
@@ -155,7 +156,23 @@ export default function CrimeMap() {
         }
     }
 
+    function handleGeocodeEvent(e: CustomEvent<GeocodeEventDetail>) {
+        console.log("handleGeocodeEvent", e.detail);
+        map.flyTo({
+            center: [e.detail.lon, e.detail.lat],
+            zoom: 16,
+            speed: 1.2,
+            curve: 1.42,
+        });
+    }
+
+    onCleanup(() => {
+        window.removeEventListener("geocode", handleGeocodeEvent as EventListener);
+    });
+
     onMount(() => {
+        window.addEventListener("geocode", handleGeocodeEvent as EventListener);
+
         map = new maplibregl.Map({
             container: mapContainer!,
             center: [-0.1278, 51.5074],

@@ -14,18 +14,21 @@ export default function Attributions() {
 
             <dialog ref={dialogRef} class="card">
                 <h5>Credits</h5>
-                <div>
+                <div class="small">
                     <p>
-                        Data from <a href='https://data.police.uk/docs/' target='_blank'>The Police API</a>.
+                        Data thanks to <a href='https://data.police.uk/docs/' target='_blank'>The Police API</a>.
                     </p>
                     <p>
-                        Map renderer by <a href='https://maplibre.org/maplibre-gl-js/docs/' target="_blank">Map Libre</a>.
+                        Map renderer thanks to <a href='https://maplibre.org/maplibre-gl-js/docs/' target="_blank">Map Libre</a>.
                     </p>
                     <p>
                         Light map &copy; <a href="https://www.openstreetmap.org/copyright" target='_blank'>OpenStreetMap</a> contributors.
                     </p>
                     <p>
                         Dark map &copy; <a href="https://www.openstreetmap.org/copyright" target='_blank'>OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>.
+                    </p>
+                    <p>
+                        Geocoding thanks to <a href="https://nominatim.openstreetmap.org" target="_blank">OpenStreetMap Nominatim</a>.
                     </p>
                     <p>
                         Coded by <a href='https://lee.goddards.space'>Lee</a>.

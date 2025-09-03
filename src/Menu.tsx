@@ -7,6 +7,7 @@ import ThemeToggle from "./components/controls/ThemeToggle";
 import LabelsToggle from "./components/controls/LabelsToggle";
 import Attributions from "./components/Attributions";
 import OutcomeSelect from "./components/controls/DisposalSelect";
+import GeoCode from "./components/controls/GeoCode";
 
 export default function Menu() {
     const [expanded, setExpanded] = createSignal(true);
@@ -22,6 +23,11 @@ export default function Menu() {
                     </button>
                     Police API Crime Visualisation
                 </header>
+
+                <div class="row">
+                    <span class="small-padding" onclick={toggle}><i>search</i></span>
+                    <GeoCode />
+                </div>
 
                 <div class="row">
                     <span class="small-padding" onclick={toggle}><i>label</i></span>
