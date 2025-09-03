@@ -19,8 +19,8 @@ export default function Menu() {
 
             <Switch>
                 <Match when={!expanded()}>
-                    <div class="top-padding">
-                        <button onclick={toggle}>
+                    <div class="top-margin no-padding">
+                        <button class="circle" onclick={toggle}>
                             <i>menu</i>
                         </button>
                     </div>
@@ -34,17 +34,17 @@ export default function Menu() {
                         </div>
 
                         <div class="row">
-                            <span class="small-padding" onclick={toggle}><i>search</i></span>
+                            <span class="small-padding"><i>search</i></span>
                             <GeoCode />
                         </div>
 
                         <div class="row">
-                            <span class="small-padding" onclick={toggle}><i>label</i></span>
+                            <span class="small-padding"><i>label</i></span>
                             <LabelsToggle />
                         </div>
 
                         <div class="row">
-                            <span class="small-padding" onclick={toggle}>
+                            <span class="small-padding">
                                 <Switch>
                                     <Match when={state.baseLayer === 'light'}>
                                         <i>dark_mode</i>
@@ -58,12 +58,12 @@ export default function Menu() {
                         </div>
 
                         <div class="row">
-                            <span class="small-padding" onclick={toggle}><i>calendar_month</i></span>
+                            <span class="small-padding"><i>calendar_month</i></span>
                             <DateSelect />
                         </div>
 
                         <div class={"row " + style["category-row"]}>
-                            <span class="small-padding" onclick={toggle}><i>category</i></span>
+                            <span class="small-padding"><i>category</i></span>
                             <details open>
                                 <summary class="no-elevate">
                                     <article class="no-padding no-elevate">
@@ -78,7 +78,7 @@ export default function Menu() {
                         </div>
 
                         <div class={"row " + style["category-row"]}>
-                            <span class="small-padding" onclick={toggle}><i>gavel</i></span>
+                            <span class="small-padding"><i>gavel</i></span>
                             <details>
                                 <summary class="no-elevate">
                                     <article class="no-padding no-elevate">
@@ -95,7 +95,7 @@ export default function Menu() {
                         <hr class="small" />
 
                         <div class="row bottom" style='margin-top: auto'>
-                            <span class="small-padding" onclick={toggle}><i>copyright</i></span>
+                            <span class="small-padding"><i>copyright</i></span>
                             <Attributions />
                         </div>
                     </nav>
