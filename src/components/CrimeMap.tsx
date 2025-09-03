@@ -13,11 +13,18 @@ import { courtDisposals, outcomeDescriptionToKey } from "../lib/court-disposals"
 import type { GeocodeEventDetail } from "./controls/GeoCode";
 
 function buildOutcomeStrokeExpression(): ExpressionSpecification {
+    if (!state.outcomes || !state.outcomes.length) {
+        return "rgba(0,0,0,0)" as unknown as ExpressionSpecification;
+    }
+
     return [
         "match",
-        ["get", "outcome"],
-        ...Object.entries(courtDisposals).flatMap(([key, { colour }]) => [key, colour]),
-        "#888" // fallback colour
+        ["get", "outcomeKey"], // use stable key per feature
+        ...state.outcomes.flatMap(outcomeKey => {
+            const colour = courtDisposals[outcomeKey]?.colour || "#888";
+            return [outcomeKey, colour];
+        }),
+        "rgba(0,0,0,0)" // fallback
     ] as unknown as ExpressionSpecification;
 }
 
