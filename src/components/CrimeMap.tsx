@@ -46,12 +46,17 @@ export default function CrimeMap() {
 
     // Light/dark basemap toggle
     createEffect(() => {
-        const showLabels = state.showLabels;
+        let showLabels;
+        if (__INC_LABELS__) {
+            showLabels = state.showLabels;
+        }
         if (state.baseLayer && mapLoaded()) {
             map.setLayoutProperty("basemap-layer-dark", "visibility", state.baseLayer === "dark" ? "visible" : "none");
             map.setLayoutProperty("basemap-layer-light", "visibility", state.baseLayer === "light" ? "visible" : "none");
-            map.setLayoutProperty("basemap-layer-dark-labels", "visibility", state.baseLayer === "dark" && showLabels ? "visible" : "none");
-            map.setLayoutProperty("basemap-layer-light-labels", "visibility", state.baseLayer === "light" && showLabels ? "visible" : "none");
+            if (__INC_LABELS__) {
+                map.setLayoutProperty("basemap-layer-dark-labels", "visibility", state.baseLayer === "dark" && showLabels ? "visible" : "none");
+                map.setLayoutProperty("basemap-layer-light-labels", "visibility", state.baseLayer === "light" && showLabels ? "visible" : "none");
+            }
         }
     });
 
@@ -200,6 +205,15 @@ export default function CrimeMap() {
             attributionControl: false,
         });
 
+        // For mobile:
+        map.dragPan.enable();
+        map.scrollZoom.enable();
+        map.doubleClickZoom.enable();
+        map.touchZoomRotate.enable({ around: "center" });
+
+        map.dragRotate.disable();
+        map.touchZoomRotate.disableRotation();
+
         map.getCanvas().style.cursor = "default";
 
         map.on("load", () => {
@@ -207,10 +221,10 @@ export default function CrimeMap() {
             map.addSource("basemap-dark", {
                 type: "raster",
                 tiles: [
-                    "https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
-                    "https://b.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
-                    "https://c.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
-                    "https://d.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+                    "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                    "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                    "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                    "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
                 ],
                 tileSize: 256,
             });
@@ -222,24 +236,25 @@ export default function CrimeMap() {
                 layout: { visibility: state.baseLayer === "dark" ? "visible" : "none" },
             });
 
-            map.addSource("basemap-dark-labels", {
-                type: "raster",
-                tiles: [
-                    "https://a.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-                    "https://b.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-                    "https://c.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-                    "https://d.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-                ],
-                tileSize: 256,
-            });
+            if (__INC_LABELS__) {
+                map.addSource("basemap-dark-labels", {
+                    type: "raster",
+                    tiles: [
+                        "https://a.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+                        "https://b.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+                        "https://c.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+                        "https://d.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+                    ],
+                    tileSize: 256,
+                });
 
-            map.addLayer({
-                type: "raster",
-                id: "basemap-layer-dark-labels",
-                source: "basemap-dark-labels",
-                layout: { visibility: state.baseLayer === "dark" && state.showLabels ? "visible" : "none" },
-            });
-
+                map.addLayer({
+                    type: "raster",
+                    id: "basemap-layer-dark-labels",
+                    source: "basemap-dark-labels",
+                    layout: { visibility: state.baseLayer === "dark" && state.showLabels ? "visible" : "none" },
+                });
+            }
 
             map.addSource("basemap-light", {
                 type: "raster",
@@ -260,23 +275,25 @@ export default function CrimeMap() {
                 layout: { visibility: state.baseLayer === "light" ? "visible" : "none" },
             });
 
-            map.addSource("basemap-light-labels", {
-                type: "raster",
-                tiles: [
-                    "https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
-                    "https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
-                    "https://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
-                    "https://d.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
-                ],
-                tileSize: 256,
-            });
+            if (__INC_LABELS__) {
+                map.addSource("basemap-light-labels", {
+                    type: "raster",
+                    tiles: [
+                        "https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+                        "https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+                        "https://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+                        "https://d.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+                    ],
+                    tileSize: 256,
+                });
 
-            map.addLayer({
-                type: "raster",
-                id: "basemap-layer-light-labels",
-                source: "basemap-light-labels",
-                layout: { visibility: state.baseLayer === "light" && state.showLabels ? "visible" : "none" },
-            });
+                map.addLayer({
+                    type: "raster",
+                    id: "basemap-layer-light-labels",
+                    source: "basemap-light-labels",
+                    layout: { visibility: state.baseLayer === "light" && state.showLabels ? "visible" : "none" },
+                });
+            }
 
             // Crimes source
             map.addSource("crimes", {

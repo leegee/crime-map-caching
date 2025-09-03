@@ -4,10 +4,10 @@ import { state } from "./store/api-ui";
 import CategorySelect from './components/controls/CategorySelect';
 import DateSelect from './components/controls/DateSelect';
 import ThemeToggle from "./components/controls/ThemeToggle";
-import LabelsToggle from "./components/controls/LabelsToggle";
 import Attributions from "./components/Attributions";
 import OutcomeSelect from "./components/controls/DisposalSelect";
 import GeoCode from "./components/controls/GeoCode";
+import LabelsToggle from "./components/controls/LabelsToggle";
 
 export default function Menu() {
     const [expanded, setExpanded] = createSignal(true);
@@ -48,10 +48,12 @@ export default function Menu() {
                             <GeoCode />
                         </div>
 
-                        <div class="row">
-                            <span class="small-padding"><i>label</i></span>
-                            <LabelsToggle />
-                        </div>
+                        {__INC_LABELS__ && (
+                            <div class="row">
+                                <span class="small-padding"><i>label</i></span>
+                                <LabelsToggle />
+                            </div>
+                        )}
 
                         <div class="row">
                             <span class="small-padding">
