@@ -2,7 +2,7 @@
   "name": "crime-map-caching",
   "description": "Map of UK Police Street-level Crime Reports and Resolutions",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "homepage": "https://leegee.github.io/crime-map-caching",
   "scripts": {
