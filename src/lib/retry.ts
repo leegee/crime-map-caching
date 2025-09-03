@@ -7,7 +7,10 @@ export async function retry<T>(
     for (let i = 0; i < retries; i++) {
         try {
             return await fn();
-        } catch (err) {
+        } catch (err: any) {
+            if (err.name === "AbortError") {
+                throw err;
+            }
             lastError = err;
             console.warn(`Retry ${i + 1}/${retries} failed`, err);
             await new Promise(res => setTimeout(res, delayMs * (i + 1)));
