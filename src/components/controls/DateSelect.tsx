@@ -2,7 +2,7 @@ import { setState, state } from "../../store/api-ui";
 
 export default function DateSelect() {
     return (
-        <div class="field row">
+        <div class="field row max">
             <input
                 class="no-padding"
                 type="month"
@@ -12,7 +12,7 @@ export default function DateSelect() {
                     setState("date", new Date(year, month - 1, 1) as Date);
                 }}
             />
-            <label class="switch icon">
+            {/* <label class="switch icon">
                 <input
                     type="checkbox"
                     checked={state.clearOnDateChange}
@@ -20,7 +20,7 @@ export default function DateSelect() {
                 />
                 <span><i>delete</i></span>
                 <div class="tooltip left">Remove from the map <br />the current data when changing date</div>
-            </label>
+            </label> */}
         </div>
     );
 }

@@ -92,7 +92,7 @@ export default function GeocodeForm() {
                         onInput={(e) => setInput(e.currentTarget.value)}
                     />
                 </div>
-                <button type="submit" class="right-round" disabled={loading()}>Search</button>
+                <button type="submit" class="right-round secondary" disabled={loading()}>Search</button>
             </nav>
 
         </form>
