@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show } from "solid-js";
+import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { Portal } from "solid-js/web";
 
 export type GeocodeEventDetail = {
@@ -12,13 +12,19 @@ export type GeocodeEventDetail = {
  */
 export default function GeocodeForm() {
     let snackbarEl: HTMLInputElement | undefined;
-    const [input, setInput] = createSignal("");
+    const [inputAddress, setInputAddress] = createSignal("");
     const [status, setStatus] = createSignal<string | null>(null);
     const [loading, setLoading] = createSignal(false);
 
     createEffect(() => {
-        if (status()) {
+        const stat = status();
+        if (stat) {
             snackbarEl?.classList.add('active');
+            if (stat) {
+                const timer = setTimeout(() => setStatus(null), 3000);
+                return () => clearTimeout(timer);
+            }
+
         } else {
             snackbarEl?.classList.remove('active');
         }
@@ -34,7 +40,7 @@ export default function GeocodeForm() {
         e.preventDefault();
         setStatus(null);
 
-        const address = sanitizeAddress(input());
+        const address = sanitizeAddress(inputAddress());
 
         if (!address) {
             setStatus("Please enter an address or postcode.");
@@ -61,7 +67,7 @@ export default function GeocodeForm() {
                 };
                 window.dispatchEvent(new CustomEvent<GeocodeEventDetail>("geocode", { detail }));
             } else {
-                setStatus("No results found.");
+                setStatus("No results found for " + inputAddress());
             }
         } catch (err) {
             console.error(err);
@@ -89,11 +95,24 @@ export default function GeocodeForm() {
                         class="input small"
                         type="text"
                         placeholder="Enter address or postcode"
-                        value={input()}
-                        onInput={(e) => setInput(e.currentTarget.value)}
+                        value={inputAddress()}
+                        onInput={(e) => setInputAddress(e.currentTarget.value)}
                     />
                 </div>
-                <button type="submit" class="right-round secondary" disabled={loading()}>Search</button>
+                <button type="submit" class={"right-round secondary "
+                    + (loading() ? 'fill' : '')
+                } disabled={loading()}>
+                    <Switch>
+                        <Match when={loading()}>
+                            <i>
+                                <div class="shape loading-indicator max"></div>
+                            </i>
+                        </Match>
+                        <Match when={!loading()}>
+                            <i>search</i>
+                        </Match>
+                    </Switch>
+                </button>
             </nav>
 
         </form>
