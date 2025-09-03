@@ -9,6 +9,7 @@ import OutcomeSelect from "./components/controls/DisposalSelect";
 import GeoCode from "./components/controls/GeoCode";
 import LabelsToggle from "./components/controls/LabelsToggle";
 import OutcomesToggleAll from "./components/controls/DisposalToggleAll";
+import CategoriesToggleAll from "./components/controls/CategoriesToggleAll";
 
 export default function Menu() {
     const [expanded, setExpanded] = createSignal(true);
@@ -83,6 +84,7 @@ export default function Menu() {
                                         <nav>
                                             <div class="small-padding max">Crime Categories</div>
                                             <i>expand_more</i>
+                                            <CategoriesToggleAll />
                                         </nav>
                                     </article>
                                 </summary>
