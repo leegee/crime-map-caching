@@ -29,9 +29,17 @@ export default function Menu() {
                 <Match when={expanded()}>
                     <nav class={style.nav + " left no-padding no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
                         <div class="row no-padding">
-                            <button class="transparent small-padding large" onclick={toggle}><i>close</i></button>
-                            <h4 class="small">Police Crime API</h4>
+                            <button class="transparent small-padding small" onClick={toggle}>
+                                <i>close</i>
+                            </button>
+
+                            <h4 class="small middle small-padding">
+                                Police Crime API
+                            </h4>
+
+                            <Attributions size="small" />
                         </div>
+
 
                         <div class="row">
                             <span class="small-padding"><i>search</i></span>
@@ -91,8 +99,6 @@ export default function Menu() {
                                 <OutcomeSelect />
                             </details>
                         </div>
-
-                        <hr class="small" />
 
                         <div class="row bottom" style='margin-top: auto'>
                             <span class="small-padding"><i>copyright</i></span>

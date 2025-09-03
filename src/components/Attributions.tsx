@@ -1,6 +1,10 @@
+import { Match, Portal, Show, Switch } from 'solid-js/web';
 import packageJson from '../../package.json';
+interface AttributionsProps {
+    size?: 'small' | 'default';
+}
 
-export default function Attributions() {
+export default function Attributions(props: AttributionsProps) {
     let dialogRef: HTMLDialogElement | undefined;
 
     const openDialog = () => dialogRef?.showModal();
@@ -8,47 +12,61 @@ export default function Attributions() {
 
     return (
         <>
-            <div class="field row middle">
-                <button class="button small transparent" onClick={openDialog}>
-                    Attributions
-                </button>
-            </div>
-
-            <dialog ref={dialogRef} class="card">
-                <h5>Credits</h5>
-                <div class="small">
-                    <p>
-                        <em>
-                            The current and previous month may not yet be available.
-                        </em>
-                    </p>
-                    <p>
-                        Data thanks to <a href='https://data.police.uk/docs/' target='_blank'>The Police API</a>.
-                    </p>
-                    <p>
-                        Map renderer thanks to <a href='https://maplibre.org/maplibre-gl-js/docs/' target="_blank">Map Libre</a>.
-                    </p>
-                    <p>
-                        Light map &copy; <a href="https://www.openstreetmap.org/copyright" target='_blank'>OpenStreetMap</a> contributors.
-                    </p>
-                    <p>
-                        Dark map &copy; <a href="https://www.openstreetmap.org/copyright" target='_blank'>OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>.
-                    </p>
-                    <p>
-                        Geocoding thanks to <a href="https://nominatim.openstreetmap.org" target="_blank">OpenStreetMap Nominatim</a>.
-                    </p>
-                    <p>
-                        Coded by <a href='https://lee.goddards.space'>Lee</a>. Version {packageJson.version}.
-                        <a href={packageJson.homepage}>Github</a>
-                    </p>
-                </div>
-
-                <nav class="right-align no-space">
-                    <button class="primary small" onClick={closeDialog}>
-                        Close
+            <Switch>
+                <Match when={props.size === 'small'}>
+                    <button class="transparent transparent" onClick={openDialog}>
+                        <i>help</i>
                     </button>
-                </nav>
-            </dialog>
+                </Match>
+                <Match when={props.size !== 'small'}>
+                    <div class="field row middle">
+                        <button class="button small transparent" onClick={openDialog}>
+                            Attributions
+                        </button>
+                    </div>
+                </Match>
+            </Switch>
+
+            <Portal mount={document.body}>
+                <dialog ref={dialogRef} class="card">
+                    <h5>Credits</h5>
+                    <div class="small">
+                        <p>
+                            <em>
+                                The current and previous month may not yet be available.
+                            </em>
+                        </p>
+
+                        <hr class="small" />
+
+                        <p>
+                            Data thanks to <a class="link" href='https://data.police.uk/docs/' target='_blank'>The Police API</a>.
+                        </p>
+                        <p>
+                            Map renderer thanks to <a class="link" href='https://maplibre.org/maplibre-gl-js/docs/' target="_blank">Map Libre</a>.
+                        </p>
+                        <p>
+                            Light map &copy; <a class="link" href="https://www.openstreetmap.org/copyright" target='_blank'>OpenStreetMap</a> contributors.
+                        </p>
+                        <p>
+                            Dark map &copy; <a class="link" href="https://www.openstreetmap.org/copyright" target='_blank'>OpenStreetMap</a> contributors &copy; <a class="link" href="https://carto.com/attributions">CARTO</a>.
+                        </p>
+                        <p>
+                            Geocoding thanks to <a class="link" href="https://nominatim.openstreetmap.org" target="_blank">OpenStreetMap Nominatim</a>.
+                        </p>
+                        <p>
+                            Coded by <a class="link" href='https://lee.goddards.space'>Lee</a>. Version {packageJson.version}.
+                            <a class="link" href={packageJson.homepage}>Github</a>
+                        </p>
+                    </div>
+
+                    <nav class="right-align padding">
+                        <button class="primary small" onClick={closeDialog}>
+                            Close
+                        </button>
+                    </nav>
+                </dialog>
+            </Portal>
         </>
     );
 }
