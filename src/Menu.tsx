@@ -16,7 +16,7 @@ export default function Menu() {
 
     return (
         <div class={'top left ' + style.container}>
-            <nav class={style.nav + " m l left no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
+            <nav class={style.nav + " left no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
                 <header class="row items-center">
                     <button class="circle transparent" onclick={toggle}>
                         <i>menu</i>
