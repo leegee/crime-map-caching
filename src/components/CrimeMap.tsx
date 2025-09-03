@@ -177,9 +177,9 @@ export default function CrimeMap() {
             container: mapContainer!,
             center: [-0.1278, 51.5074],
             zoom: 14,
+            minZoom: 12,
             style: {
                 version: 8,
-                glyphs: "fonts/{fontstack}/{range}.pbf",
                 sources: {},
                 layers: [],
             },
