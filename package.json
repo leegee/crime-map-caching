@@ -6,10 +6,10 @@
   "type": "module",
   "homepage": "https://leegee.github.io/crime-map-caching",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc -b && vite build",
     "deploy": "tsc -b && vite build && gh-pages -d dist",
-    "preview": "vite preview",
+    "preview": "vite preview  --host",
     "generate-icons": "pwa-asset-generator src/assets/logo.png public/icons --background '#000000'"
   },
   "dependencies": {
@@ -22,8 +22,10 @@
     "solid-js": "^1.9.8"
   },
   "devDependencies": {
+    "@types/qrcode-terminal": "^0.12.2",
     "gh-pages": "^6.3.0",
     "pwa-asset-generator": "^8.1.1",
+    "qrcode-terminal": "^0.12.0",
     "sass-embedded": "^1.91.0",
     "typescript": "~5.8.3",
     "vite": "^7.1.2",
