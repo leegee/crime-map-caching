@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/crime-map-caching/sw.js', { scope: '/crime-map-caching/' })})}
