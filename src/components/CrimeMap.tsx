@@ -289,12 +289,8 @@ export default function CrimeMap() {
                     },
                 });
 
-                map.on("mouseenter", `crime-${category}`, () => {
-                    map.getCanvas().style.cursor = "pointer";
-                });
-                map.on("mouseleave", `crime-${category}`, () => {
-                    map.getCanvas().style.cursor = "default";
-                });
+                map.on("mouseenter", `crime-${category}`, () => map.getCanvas().style.cursor = "pointer");
+                map.on("mouseleave", `crime-${category}`, () => map.getCanvas().style.cursor = "default");
 
                 map.on("click", `crime-${category}`, (e) => {
                     const feature = e.features![0];
