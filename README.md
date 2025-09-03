@@ -6,6 +6,8 @@ Out of the respect to the tax payer-funded API
 [Rate limit](https://data.police.uk/docs/api-call-limits/),
 makes no more than 10 requests per second, and out of respect of the user caches to Index DB, purging when reaching the maximum allowed by the storage manager.
 
+Colours points by crime and optionally also by court disposal, the outcome - if any - of the police action.
+
 ## Usage
 
 ```bash
