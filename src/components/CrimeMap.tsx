@@ -177,7 +177,7 @@ export default function CrimeMap() {
             container: mapContainer!,
             center: [-0.1278, 51.5074],
             zoom: 14,
-            minZoom: 12,
+            minZoom: 13,
             style: {
                 version: 8,
                 sources: {},
@@ -279,7 +279,7 @@ export default function CrimeMap() {
                     source: "crimes",
                     filter: ["==", ["get", "category"], category],
                     paint: {
-                        "circle-radius": 5,
+                        "circle-radius": 10,
                         "circle-color": colour,
                         "circle-stroke-color": buildOutcomeStrokeExpression(),
                         "circle-stroke-width": 5,
