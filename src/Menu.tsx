@@ -28,7 +28,7 @@ export default function Menu() {
 
                 <Match when={expanded()}>
                     <nav class={style.nav + " left no-padding no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
-                        <div class={"row no-padding fixed top-0 " + style['first-row']}>
+                        <div class={"row no-padding fixed top-0 medium-width " + style['first-row']}>
                             <button class="transparent small-padding small" onClick={toggle}>
                                 <i>close</i>
                             </button>

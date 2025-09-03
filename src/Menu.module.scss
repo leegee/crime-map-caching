@@ -19,9 +19,8 @@
 }
 
 .first-row {
-    background: black !important;
-    z-index: 10;
-    width: 100%;
+    background: var(--surface) !important;
+    z-index: 2;
 }
 
 .menu-item {

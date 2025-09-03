@@ -1,4 +1,4 @@
-import { Match, Portal, Show, Switch } from 'solid-js/web';
+import { Match, Portal, Switch } from 'solid-js/web';
 import packageJson from '../../package.json';
 interface AttributionsProps {
     size?: 'small' | 'default';
