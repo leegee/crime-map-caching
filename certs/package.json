@@ -1,0 +1,6 @@
+{
+    "name": "certs",
+    "scripts": {
+        "setup": "bun make-certs.js"
+    }
+}

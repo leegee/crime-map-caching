@@ -1,11 +1,18 @@
+import os from 'node:os';
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { defineConfig, type ViteDevServer, type PreviewServer } from 'vite';
 import solid from 'vite-plugin-solid';
 import solidSvg from 'vite-plugin-solid-svg';
 import { VitePWA } from 'vite-plugin-pwa';
 import qr from 'qrcode-terminal';
-import os from 'os';
 
 import packageJson from './package.json';
+
+const certsDir = path.resolve(__dirname, 'certs');
+const keyPath = path.join(certsDir, 'key.pem');
+const certPath = path.join(certsDir, 'cert.pem');
 
 function getLANAddress(): string {
   const nets = os.networkInterfaces();
@@ -67,8 +74,14 @@ export default defineConfig({
     __INC_LABELS__: false, // Include map labels
   },
 
-  server: { host: true },
   preview: { host: true },
+  server: {
+    host: true,
+    https: {
+      key: fs.readFileSync(path.resolve(keyPath)),
+      cert: fs.readFileSync(path.resolve(certPath)),
+    },
+  },
 
   plugins: [
     solid(),

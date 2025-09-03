@@ -6,7 +6,7 @@
   "type": "module",
   "homepage": "https://leegee.github.io/crime-map-caching",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "deploy": "tsc -b && vite build && gh-pages -d dist",
     "preview": "vite preview",
