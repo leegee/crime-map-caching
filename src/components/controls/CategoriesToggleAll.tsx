@@ -11,6 +11,7 @@ export default function CategoriesToggleAll() {
     return (
         <label class="switch">
             <input
+                name="all-categories"
                 type="checkbox"
                 checked={allSelected()}
                 onInput={e => toggleAll(e.currentTarget.checked)}

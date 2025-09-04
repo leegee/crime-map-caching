@@ -13,6 +13,7 @@ export default function OutcomesToggleAll() {
     return (
         <label class="switch">
             <input
+                name="all-disposals"
                 type="checkbox"
                 checked={allSelected()}
                 onInput={e => toggleAll(e.currentTarget.checked)}
