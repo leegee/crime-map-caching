@@ -1,0 +1,17 @@
+.input-container {
+    width: 100%;
+    z-index: 20;
+
+    .autocomplete {
+        z-index: 20;
+        max-width: 17em;
+    }
+
+    .autocomplete-item {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100%;
+        padding: 0.25em 0.5em !important;
+    }
+}
