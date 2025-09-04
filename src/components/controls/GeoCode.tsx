@@ -18,6 +18,7 @@ type Suggestion = {
     address: {
         road?: string;
         quarter?: string;
+        suburb?: string;
         city?: string;
         town?: string;
     };
@@ -202,7 +203,7 @@ export default function GeocodeForm() {
                                     >
                                         {
                                             item.osm_type === 'way'
-                                                ? item.address.road + ' ' + (item.address.city || item.address.town)
+                                                ? item.address.road + ' ' + (item.address.quarter ?? item.address.suburb) + ' ' + (item.address.town || item.address.city)
                                                 : item.display_name
                                         }
                                     </div>
