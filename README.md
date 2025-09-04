@@ -8,6 +8,8 @@ makes no more than 10 requests per second, and out of respect of the user caches
 
 Colours points by crime and optionally also by court disposal, the outcome - if any - of the police action.
 
+Includes address look-up and auto-complete.
+
 ## Usage
 
 ```bash
