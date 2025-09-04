@@ -29,13 +29,14 @@ export default function Menu() {
                 </Match>
 
                 <Match when={expanded()}>
-                    <nav class={style.nav + " left no-padding no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
-                        <div class={"row no-padding fixed top-0 medium-width surface-container " + style['first-row']}>
-                            <button class="transparent small-padding small" onClick={toggle}>
+                    <nav class={style.nav + " left small-padding no-margin " + (expanded() ? 'medium-width' : style["nav-small"])}>
+
+                        <div class={"row top left no-padding fixed top-0 medium-width surface-container " + style['first-row']}>
+                            <button class="transparent small" onClick={toggle}>
                                 <i>close</i>
                             </button>
 
-                            <h4 class="small  small-padding">
+                            <h4 class="small">
                                 Police Crime API
                             </h4>
 
@@ -97,7 +98,7 @@ export default function Menu() {
                             <details>
                                 <summary class="no-elevate">
                                     <article class="no-padding no-elevate">
-                                        <nav class="flex items-center small-padding max">
+                                        <nav class="flex items-center max">
                                             Court Disposals
                                             <div style="margin-left: 0.5em;">
                                             </div>
