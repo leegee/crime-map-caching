@@ -1,6 +1,15 @@
 {
   "name": "crime-map-caching",
   "description": "Map of UK Police Street-level Crime Reports and Resolutions",
+  "keywords": [
+    "crime-data",
+    "uk",
+    "police",
+    "crime",
+    "police",
+    "api",
+    "police-api"
+  ],
   "private": true,
   "version": "0.0.3",
   "type": "module",
