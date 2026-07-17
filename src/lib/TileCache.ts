@@ -38,7 +38,7 @@ export class TileCache<T> {
     private async openDb() {
         if (this.db) return this.db;
         return new Promise<IDBDatabase>((resolve, reject) => {
-            const req = indexedDB.open("tileCacheDB", 2);
+            const req = indexedDB.open("tileCacheDB", 3);
             req.onupgradeneeded = () => {
                 const db = req.result;
                 if (!db.objectStoreNames.contains("tiles")) {

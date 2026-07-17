@@ -8,19 +8,19 @@
 
 import pLimit from "p-limit";
 import { TileCache } from "./TileCache";
-import type { CrimeRecord } from "./types";
+import type { Crime, CrimeRecord } from "./types";
 import { flattenCrime } from "./flatten-crime";
 import { retry } from "./retry";
 import { formatDateForUrl } from "./format-date";
 
-const ongoingTileRequests = new Map<string, AbortController>();
-
-type TileDataCallback = (records: CrimeRecord[]) => void;
+export type TileDataCallback = (records: CrimeRecord[]) => void;
 
 const RETRIES = 3;
 const RETRY_DELAY_MS = 500;
 const MAX_CONCURRENT_REQUESTS = pLimit(10);
 const LAT_LNG_PRECISION = 6;
+
+const ongoingTileRequests = new Map<string, AbortController>();
 
 async function fetchData(
     sw: [number, number],
@@ -61,7 +61,7 @@ export async function fetchDataForViewport(
     bounds: maplibregl.LngLatBounds,
     date: Date,
     category: string = "violent-crime",
-    onTileData?: CrimeCallback
+    onTileData?: TileDataCallback
 ): Promise<void> {
     const minLon = Number(bounds.getWest().toFixed(LAT_LNG_PRECISION));
     const minLat = Number(bounds.getSouth().toFixed(LAT_LNG_PRECISION));
@@ -117,19 +117,22 @@ export async function fetchDataForViewport(
                     RETRIES,
                     RETRY_DELAY_MS
                 );
-
                 if (crimes.length && onTileData) {
-                    const records = crimes.map(flattenCrime);
+                    const records = crimes.map(flattenCrime)
                     await tileCache.storeTile(category, dateKey, tileX, tileY, records);
-                    onTileData(crimes);
+                    onTileData(records);
                 }
-            } catch (err) {
+            }
+
+            catch (err) {
                 if ((err as any).name === "AbortError") {
                     console.log(`Tile fetch aborted: ${ tileKey }`);
                 } else {
                     console.warn(`Failed to fetch tile (${ tileX }, ${ tileY })`, err);
                 }
-            } finally {
+            }
+
+            finally {
                 ongoingTileRequests.delete(tileKey);
             }
         })

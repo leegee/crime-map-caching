@@ -5,12 +5,13 @@ import maplibregl, { type ExpressionSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import styles from './CrimeMap.module.scss';
-import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory } from "../lib/types";
+import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory, CrimeRecord } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { crimeCategories } from "../lib/categories";
 import { setState, state } from "../store/api-ui";
-import { courtDisposals, outcomeDescriptionToKey } from "../lib/court-disposals";
+import { courtDisposals } from "../lib/court-disposals";
 import type { GeocodeEventDetail } from "./controls/GeoCode";
+import { crimeRecordToFeature } from "../lib/crime-record-to-feature";
 
 function buildOutcomeStrokeExpression(): ExpressionSpecification {
     if (!state.outcomes || !state.outcomes.length) {
@@ -68,9 +69,9 @@ export default function CrimeMap() {
         const strokeWidth = state.outcomes.length ? 5 : 0;
 
         for (const category of Object.keys(crimeCategories) as CrimeCategory[]) {
-            if (map.getLayer(`crime-${category}`)) {
-                map.setPaintProperty(`crime-${category}`, "circle-stroke-color", strokeColor);
-                map.setPaintProperty(`crime-${category}`, "circle-stroke-width", strokeWidth);
+            if (map.getLayer(`crime-${ category }`)) {
+                map.setPaintProperty(`crime-${ category }`, "circle-stroke-color", strokeColor);
+                map.setPaintProperty(`crime-${ category }`, "circle-stroke-width", strokeWidth);
             }
         }
     });
@@ -115,30 +116,32 @@ export default function CrimeMap() {
 
             // Fetch tiles for this category
             tilesToFetchPromises.push(
-                fetchDataForViewport(state.bounds, state.date, category, (newCrimes) => {
-                    const newFeatures: CrimeFeature[] = newCrimes.map((crime) => {
-                        const outcomeDesc = crime.outcome_status?.category;
-                        const outcomeKey = outcomeDesc ? outcomeDescriptionToKey[outcomeDesc] : "unknown";
+                fetchDataForViewport(state.bounds, state.date, category, (newCrimes: CrimeRecord[]) => {
+                    // const newFeatures: CrimeFeature[] = newCrimes.map((crime) => {
+                    //     const outcomeDesc = crime.outcome_status?.category;
+                    //     const outcomeKey = outcomeDesc ? outcomeDescriptionToKey[outcomeDesc] : "unknown";
 
-                        return {
-                            type: "Feature",
-                            geometry: {
-                                type: "Point",
-                                coordinates: [
-                                    parseFloat(crime.location.longitude),
-                                    parseFloat(crime.location.latitude),
-                                ],
-                            },
-                            properties: {
-                                category: crime.category,
-                                outcome: outcomeDesc || "Unknown",   // human-readable
-                                outcomeKey,                          // stable key
-                                month: crime.month,
-                                streetName: crime.location.street.name,
-                                context: crime.context,
-                            },
-                        };
-                    });
+                    //     return {
+                    //         type: "Feature",
+                    //         geometry: {
+                    //             type: "Point",
+                    //             coordinates: [
+                    //                 parseFloat(crime.location.longitude),
+                    //                 parseFloat(crime.location.latitude),
+                    //             ],
+                    //         },
+                    //         properties: {
+                    //             category: crime.category,
+                    //             outcome: outcomeDesc || "Unknown",   // human-readable
+                    //             outcomeKey,                          // stable key
+                    //             month: crime.month,
+                    //             streetName: crime.location.street.name,
+                    //             context: crime.context,
+                    //         },
+                    //     };
+                    // });
+
+                    const newFeatures: CrimeFeature[] = newCrimes.map(crimeRecordToFeature);
 
                     const filtered = state.outcomes?.length
                         ? newFeatures.filter(f => f.properties?.outcomeKey && state.outcomes.includes(f.properties.outcomeKey))
@@ -167,8 +170,8 @@ export default function CrimeMap() {
             // Toggle visibility for each category layer
             for (const category of Object.keys(crimeCategories) as CrimeCategory[]) {
                 const visible = state.categories?.includes(category) ? "visible" : "none";
-                if (map.getLayer(`crime-${category}`)) {
-                    map.setLayoutProperty(`crime-${category}`, "visibility", visible);
+                if (map.getLayer(`crime-${ category }`)) {
+                    map.setLayoutProperty(`crime-${ category }`, "visibility", visible);
                 }
             }
         }
@@ -304,7 +307,7 @@ export default function CrimeMap() {
             // One layer per category
             for (const [category, { colour }] of Object.entries(crimeCategories)) {
                 map.addLayer({
-                    id: `crime-${category}`,
+                    id: `crime-${ category }`,
                     type: "circle",
                     source: "crimes",
                     filter: ["==", ["get", "category"], category],
@@ -319,10 +322,10 @@ export default function CrimeMap() {
                     },
                 });
 
-                map.on("mouseenter", `crime-${category}`, () => map.getCanvas().style.cursor = "pointer");
-                map.on("mouseleave", `crime-${category}`, () => map.getCanvas().style.cursor = "default");
+                map.on("mouseenter", `crime-${ category }`, () => map.getCanvas().style.cursor = "pointer");
+                map.on("mouseleave", `crime-${ category }`, () => map.getCanvas().style.cursor = "default");
 
-                map.on("click", `crime-${category}`, (e) => {
+                map.on("click", `crime-${ category }`, (e) => {
                     const feature = e.features![0];
                     const coordinates = (feature.geometry as GeoJSON.Point).coordinates;
                     popup = new maplibregl.Popup({
@@ -335,19 +338,19 @@ export default function CrimeMap() {
                                 <table>
                                         <tr>
                                             <th>Street</th>
-                                            <td>${feature.properties.streetName}</td>
+                                            <td>${ feature.properties.streetName }</td>
                                         </tr><tr>
                                             <th>Category</th>
-                                            <td>${crimeCategories[feature.properties.category as CrimeCategory].description}</td>
+                                            <td>${ crimeCategories[feature.properties.category as CrimeCategory].description }</td>
                                         </tr><tr>
                                             <th>Outcome</th>
-                                            <td>${feature.properties.outcome}</td>
+                                            <td>${ feature.properties.outcome }</td>
                                         </tr><tr>
                                             <th>Month</th>
-                                            <td>${feature.properties.month}</td>
+                                            <td>${ feature.properties.month }</td>
                                         </tr><tr>
                                             <th>Context</th>
-                                            <td>${feature.properties.context || 'None provided'}</td>
+                                            <td>${ feature.properties.context || 'None provided' }</td>
                                         </tr>
                                     </table>
                                 </article>`
