@@ -168,14 +168,55 @@ export default function CrimeMap() {
                     ],
                     getRadius: 10,
                     radiusUnits: "meters",
-                    getFillColor: [
-                        255,
-                        0,
-                        0,
-                        180,
-                    ],
-
+                    getFillColor: d => {
+                        return [
+                            ...crimeCategories[d.category].colour,
+                            200,
+                        ];
+                    },
                     pickable: true,
+                    onClick: info => {
+                        if (!info.object) return;
+
+                        const crime = info.object as CrimeRecord;
+
+                        popup?.remove();
+
+                        popup = new maplibregl.Popup({
+                            closeButton: false,
+                        })
+                            .setLngLat([
+                                crime.lon,
+                                crime.lat,
+                            ])
+                            .setHTML(`
+                        <article class="primary-container no-elevate no-padding">
+                            <table>
+                                <tr>
+                                    <th>Street</th>
+                                    <td>${ crime.streetName }</td>
+                                </tr>
+                                <tr>
+                                    <th>Category</th>
+                                    <td>${ crimeCategories[crime.category].description }</td>
+                                </tr>
+                                <tr>
+                                    <th>Outcome</th>
+                                    <td>${ crime.outcome }</td>
+                                </tr>
+                                <tr>
+                                    <th>Month</th>
+                                    <td>${ crime.month }</td>
+                                </tr>
+                                <tr>
+                                    <th>Context</th>
+                                    <td>${ crime.context || "None provided" }</td>
+                                </tr>
+                            </table>
+                        </article>
+                    `)
+                            .addTo(map!);
+                    },
                 }),
             ],
         });

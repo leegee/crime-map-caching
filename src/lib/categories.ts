@@ -1,64 +1,60 @@
 // https://data.police.uk/api/crime-categories
 
 export const crimeCategories = {
-    // "all-crime": {
-    //     description: "All crime",
-    //     colour: "rgb(128, 128, 128)", // grey
-    // },
     "anti-social-behaviour": {
         description: "Anti-social behaviour",
-        colour: "rgb(255, 204, 102)", // light orange
+        colour: [255, 204, 102],
     },
     "bicycle-theft": {
         description: "Bicycle theft",
-        colour: "rgb(102, 178, 255)", // sky blue
+        colour: [102, 178, 255],
     },
     "burglary": {
         description: "Burglary",
-        colour: "rgb(255, 128, 0)", // orange
+        colour: [255, 128, 0],
     },
     "criminal-damage-arson": {
         description: "Criminal damage and arson",
-        colour: "rgb(255, 51, 51)", // red
+        colour: [255, 51, 51],
     },
     "drugs": {
         description: "Drugs",
-        colour: "rgb(153, 102, 255)", // purple
+        colour: [153, 102, 255],
     },
     "other-theft": {
         description: "Other theft",
-        colour: "rgb(255, 153, 204)", // pink
+        colour: [255, 153, 204],
     },
     "possession-of-weapons": {
         description: "Possession of weapons",
-        colour: "rgb(219, 69, 69)", // dark red
+        colour: [219, 69, 69],
     },
     "public-order": {
         description: "Public order",
-        colour: "rgb(255, 255, 102)", // yellow
+        colour: [255, 255, 102],
     },
     "robbery": {
         description: "Robbery",
-        colour: "rgb(255, 102, 102)", // light red
+        colour: [255, 102, 102],
     },
     "shoplifting": {
         description: "Shoplifting",
-        colour: "rgb(255, 204, 153)", // peach
+        colour: [255, 204, 153],
     },
     "theft-from-the-person": {
         description: "Theft from the person",
-        colour: "rgb(255, 153, 102)", // orange-peach
+        colour: [255, 153, 102],
     },
     "vehicle-crime": {
         description: "Vehicle crime",
-        colour: "rgb(102, 255, 102)", // light green
+        colour: [102, 255, 102],
     },
     "violent-crime": {
         description: "Violence and sexual offences",
-        colour: "rgb(255, 0, 0)", // bright red
+        colour: [255, 0, 0],
     },
     "other-crime": {
         description: "Other crime",
-        colour: "rgb(192, 192, 192)", // silver
+        colour: [192, 192, 192],
     },
-};
+} as const;
