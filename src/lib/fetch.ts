@@ -16,8 +16,8 @@ import { formatDateForUrl } from "./format-date";
 export type TileDataCallback = (records: CrimeRecord[]) => void;
 
 const RETRIES = 3;
-const RETRY_DELAY_MS = 500;
-const MAX_CONCURRENT_REQUESTS = pLimit(10);
+const RETRY_DELAY_MS = 30_000; // The Police API requirement
+const MAX_CONCURRENT_REQUESTS = pLimit(2);
 const LAT_LNG_PRECISION = 6;
 
 const ongoingTileRequests = new Map<string, AbortController>();
