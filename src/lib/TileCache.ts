@@ -12,18 +12,18 @@ interface TileGridOptions {
     tileHeight: number;
 }
 
-interface TileRecord {
+interface TileRecord<T> {
     category: string;
     dateKey: string;
     key: TileKey;
     lastUsed: number;
-    geojson: any;
+    data: T;
 }
 
-export class TileCache {
+export class TileCache<T> {
     private loadedTiles: Map<string, Map<string, Set<TileKey>>> = new Map();
     private lastUsed: Map<string, Map<string, Map<TileKey, number>>> = new Map();
-    private geojsonCache: Map<string, Map<string, Map<TileKey, any>>> = new Map();
+    private dataCache: Map<string, Map<string, Map<TileKey, T>>> = new Map();
     private opts: TileGridOptions;
     private db: IDBDatabase | null = null;
 
@@ -32,7 +32,7 @@ export class TileCache {
     }
 
     private tileKey(x: number, y: number) {
-        return `${x}:${y}`;
+        return `${ x }:${ y }`;
     }
 
     private async openDb() {
@@ -53,7 +53,7 @@ export class TileCache {
         });
     }
 
-    private async putTileRecord(record: TileRecord) {
+    private async putTileRecord(record: TileRecord<T>) {
         const db = await this.openDb();
         return new Promise<void>((resolve, reject) => {
             const tx = db.transaction("tiles", "readwrite");
@@ -63,49 +63,55 @@ export class TileCache {
         });
     }
 
-    private async loadAllTileRecords(): Promise<TileRecord[]> {
+    private async loadAllTileRecords(): Promise<TileRecord<T>[]> {
         const db = await this.openDb();
         return new Promise((resolve, reject) => {
             const tx = db.transaction("tiles", "readonly");
             const store = tx.objectStore("tiles");
             const req = store.getAll();
-            req.onsuccess = () => resolve(req.result as TileRecord[]);
+            req.onsuccess = () => resolve(req.result as TileRecord<T>[]);
             req.onerror = () => reject(req.error);
         });
     }
 
     async initFromDb() {
         const records = await this.loadAllTileRecords();
-        for (const { category, dateKey, key, lastUsed, geojson } of records) {
+        for (const { category, dateKey, key, lastUsed, data } of records) {
             if (!this.loadedTiles.has(category)) this.loadedTiles.set(category, new Map());
             if (!this.lastUsed.has(category)) this.lastUsed.set(category, new Map());
-            if (!this.geojsonCache.has(category)) this.geojsonCache.set(category, new Map());
+            if (!this.dataCache.has(category)) this.dataCache.set(category, new Map());
 
             const dateMap = this.loadedTiles.get(category)!;
             const lastUsedDateMap = this.lastUsed.get(category)!;
-            const geojsonDateMap = this.geojsonCache.get(category)!;
+            const dataDateMap = this.dataCache.get(category)!;
 
             if (!dateMap.has(dateKey)) dateMap.set(dateKey, new Set());
             if (!lastUsedDateMap.has(dateKey)) lastUsedDateMap.set(dateKey, new Map());
-            if (!geojsonDateMap.has(dateKey)) geojsonDateMap.set(dateKey, new Map());
+            if (!dataDateMap.has(dateKey)) dataDateMap.set(dateKey, new Map());
 
             dateMap.get(dateKey)!.add(key);
             lastUsedDateMap.get(dateKey)!.set(key, lastUsed);
-            geojsonDateMap.get(dateKey)!.set(key, geojson);
+            dataDateMap.get(dateKey)!.set(key, data);
         }
-        console.log(`TileCache: loaded ${records.length} tiles from IndexedDB`);
+        console.log(`TileCache: loaded ${ records.length } tiles from IndexedDB`);
     }
 
-    async markTileLoaded(category: string, dateKey: string, x: number, y: number, geojson: any) {
+    async storeTile(
+        category: string,
+        dateKey: string,
+        x: number,
+        y: number,
+        data: T
+    ) {
         const key = this.tileKey(x, y);
 
         if (!this.loadedTiles.has(category)) this.loadedTiles.set(category, new Map());
         if (!this.lastUsed.has(category)) this.lastUsed.set(category, new Map());
-        if (!this.geojsonCache.has(category)) this.geojsonCache.set(category, new Map());
+        if (!this.dataCache.has(category)) this.dataCache.set(category, new Map());
 
         const dateMap = this.loadedTiles.get(category)!;
         const lastUsedDateMap = this.lastUsed.get(category)!;
-        const geojsonDateMap = this.geojsonCache.get(category)!;
+        const geojsonDateMap = this.dataCache.get(category)!;
 
         if (!dateMap.has(dateKey)) dateMap.set(dateKey, new Set());
         if (!lastUsedDateMap.has(dateKey)) lastUsedDateMap.set(dateKey, new Map());
@@ -113,19 +119,29 @@ export class TileCache {
 
         dateMap.get(dateKey)!.add(key);
         lastUsedDateMap.get(dateKey)!.set(key, Date.now());
-        geojsonDateMap.get(dateKey)!.set(key, geojson);
+        geojsonDateMap.get(dateKey)!.set(key, data);
 
         await this.putTileRecord({
             category,
             dateKey,
             key,
             lastUsed: Date.now(),
-            geojson,
+            data,
         });
     }
 
-    getTileGeoJSON(category: string, dateKey: string, x: number, y: number): any | undefined {
-        return this.geojsonCache.get(category)?.get(dateKey)?.get(this.tileKey(x, y));
+    getTile(
+        category: string,
+        dateKey: string,
+        x: number,
+        y: number
+    ): T | undefined {
+        const tile = this.dataCache
+            .get(category)
+            ?.get(dateKey)
+            ?.get(this.tileKey(x, y));
+
+        return tile;
     }
 
     isTileLoaded(category: string, dateKey: string, x: number, y: number): boolean {
@@ -140,11 +156,11 @@ export class TileCache {
     async deleteTile(category: string, dateKey: string, key: TileKey) {
         this.loadedTiles.get(category)?.get(dateKey)?.delete(key);
         this.lastUsed.get(category)?.get(dateKey)?.delete(key);
-        this.geojsonCache.get(category)?.get(dateKey)?.delete(key);
+        this.dataCache.get(category)?.get(dateKey)?.delete(key);
 
         if (this.loadedTiles.get(category)?.get(dateKey)?.size === 0) this.loadedTiles.get(category)?.delete(dateKey);
         if (this.lastUsed.get(category)?.get(dateKey)?.size === 0) this.lastUsed.get(category)?.delete(dateKey);
-        if (this.geojsonCache.get(category)?.get(dateKey)?.size === 0) this.geojsonCache.get(category)?.delete(dateKey);
+        if (this.dataCache.get(category)?.get(dateKey)?.size === 0) this.dataCache.get(category)?.delete(dateKey);
 
         const db = await this.openDb();
         return new Promise<void>((resolve, reject) => {
@@ -180,7 +196,7 @@ export class TileCache {
             freedBytes += BYTES_PER_TILE_EST;
         }
 
-        console.log(`Purged ${Math.floor(freedBytes / BYTES_PER_TILE_EST)} tiles to stay under quota`);
+        console.log(`Purged ${ Math.floor(freedBytes / BYTES_PER_TILE_EST) } tiles to stay under quota`);
     }
 
     private async getAvailableQuota(): Promise<number> {

@@ -32,21 +32,21 @@ async function fetchData(
     const se: [number, number] = [sw[0], ne[1]];
 
     const poly = [sw, nw, ne, se, sw]
-        .map(([lat, lng]) => `${lat},${lng}`)
+        .map(([lat, lng]) => `${ lat },${ lng }`)
         .join(":");
 
-    let url = `https://data.police.uk/api/crimes-street/${category}?poly=${poly}`;
-    if (date) url += `&date=${formatDateForUrl(date)}`;
+    let url = `https://data.police.uk/api/crimes-street/${ category }?poly=${ poly }`;
+    if (date) url += `&date=${ formatDateForUrl(date) }`;
     console.log("Fetching crimes from URL:", url);
 
     const res = await fetch(url, { signal });
-    if (!res.ok) throw new Error(`HTTP error - status: ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP error - status: ${ res.status }`);
 
     const crimes: Crime[] = await res.json();
     return crimes;
 }
 
-const tileCache = new TileCache({
+const tileCache = new TileCache<Crime[]>({
     minLon: -180,
     minLat: -90,
     tileHeight: 0.072,
@@ -71,7 +71,7 @@ export async function fetchDataForViewport(
     const tilesInView = tileCache.getTilesInBBox(minLon, minLat, maxLon, maxLat);
 
     const tilesInViewKeys = new Set(
-        tilesInView.map(([x, y]) => `${category}-${dateKey}-${x}-${y}`)
+        tilesInView.map(([x, y]) => `${ category }-${ dateKey }-${ x }-${ y }`)
     );
 
     // Abort tiles no longer in view
@@ -85,10 +85,10 @@ export async function fetchDataForViewport(
     // Render cached tiles once
     const renderedTiles = new Set<string>();
     for (const [tileX, tileY] of tilesInView) {
-        const tileKey = `${category}-${dateKey}-${tileX}-${tileY}`;
+        const tileKey = `${ category }-${ dateKey }-${ tileX }-${ tileY }`;
         if (renderedTiles.has(tileKey)) continue;
 
-        const cached = tileCache.getTileGeoJSON(category, dateKey, tileX, tileY);
+        const cached = tileCache.getTile(category, dateKey, tileX, tileY);
         if (cached && onTileData) {
             onTileData(cached);
             renderedTiles.add(tileKey);
@@ -98,11 +98,11 @@ export async function fetchDataForViewport(
 
     // Fetch missing tiles
     const tilesToFetch = tileCache.getTilesToFetchWithLruUpdate(category, dateKey, tilesInView)
-        .filter(([x, y]) => !ongoingTileRequests.has(`${category}-${dateKey}-${x}-${y}`));
+        .filter(([x, y]) => !ongoingTileRequests.has(`${ category }-${ dateKey }-${ x }-${ y }`));
 
     const fetchPromises = tilesToFetch.map(([tileX, tileY]) =>
         MAX_CONCURRENT_REQUESTS(async () => {
-            const tileKey = `${category}-${dateKey}-${tileX}-${tileY}`;
+            const tileKey = `${ category }-${ dateKey }-${ tileX }-${ tileY }`;
             const controller = new AbortController();
             ongoingTileRequests.set(tileKey, controller);
 
@@ -118,14 +118,14 @@ export async function fetchDataForViewport(
                 );
 
                 if (crimes.length && onTileData) {
-                    await tileCache.markTileLoaded(category, dateKey, tileX, tileY, crimes);
+                    await tileCache.storeTile(category, dateKey, tileX, tileY, crimes);
                     onTileData(crimes);
                 }
             } catch (err) {
                 if ((err as any).name === "AbortError") {
-                    console.log(`Tile fetch aborted: ${tileKey}`);
+                    console.log(`Tile fetch aborted: ${ tileKey }`);
                 } else {
-                    console.warn(`Failed to fetch tile (${tileX}, ${tileY})`, err);
+                    console.warn(`Failed to fetch tile (${ tileX }, ${ tileY })`, err);
                 }
             } finally {
                 ongoingTileRequests.delete(tileKey);
