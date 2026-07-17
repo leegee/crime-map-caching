@@ -1,20 +1,29 @@
 export async function retry<T>(
     fn: () => Promise<T>,
-    retries: number = 3,
-    delayMs: number = 500
+    retries: number,
+    delayMs: number
 ): Promise<T> {
-    let lastError: any;
-    for (let i = 0; i < retries; i++) {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
         try {
             return await fn();
-        } catch (err: any) {
-            if (err.name === "AbortError") {
-                throw err;
-            }
+        } catch (err) {
             lastError = err;
-            console.warn(`Retry ${i + 1}/${retries} failed`, err);
-            await new Promise(res => setTimeout(res, delayMs * (i + 1)));
+
+            if (attempt === retries) break;
+
+            const retryAfter = Number((err as any).retryAfter);
+
+            const delay = Number.isFinite(retryAfter)
+                ? retryAfter * 1000
+                : delayMs * (attempt + 1);
+
+            await new Promise(resolve =>
+                setTimeout(resolve, delay)
+            );
         }
     }
+
     throw lastError;
 }

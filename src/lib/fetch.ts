@@ -42,6 +42,16 @@ async function fetchData(
 
     const res = await fetch(url, { signal });
 
+    if (res.status === 429) {
+        const retryAfter = res.headers.get("retry-after");
+
+        const error = new Error(
+            `Police API rate limited${ retryAfter ? `, retry after ${ retryAfter }s` : "" }`
+        );
+
+        (error as any).retryAfter = retryAfter;
+        throw error;
+    }
 
     if (!res.ok) throw new Error(`HTTP error - status: ${ res.status }`);
 
