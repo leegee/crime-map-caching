@@ -175,7 +175,6 @@ export default function CrimeMap() {
                         ];
                     },
                     pickable: true,
-                    onHover: () => { map.getCanvas().style.cursor = "crosshair" },
                     autoHighlight: true,
                     highlightColor: [255, 255, 255, 80],
 
@@ -252,8 +251,6 @@ export default function CrimeMap() {
 
         map.dragRotate.disable();
         map.touchZoomRotate.disableRotation();
-
-        // map.getCanvas().style.cursor = "crosshair";
 
         map.on("load", () => {
             const overlay = new MapboxOverlay({
