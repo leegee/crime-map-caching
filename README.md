@@ -10,6 +10,10 @@ Colours points by [crime category](https://data.police.uk/api/crime-categories) 
 
 Includes address look-up and auto-complete.
 
+## Stack
+
+Maplibre, DeckGL, IndexDB API, fetch API.
+
 ## Usage
 
 ```bash
