@@ -1,19 +1,19 @@
 /* @refresh reset */
 
+import "maplibre-gl/dist/maplibre-gl.css";
+import styles from './CrimeMap.module.scss';
+
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import maplibregl, { type ExpressionSpecification } from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
 import { MapboxOverlay } from "@deck.gl/mapbox";
+import { ScatterplotLayer } from "@deck.gl/layers";
 
-import styles from './CrimeMap.module.scss';
 import type { CrimeCategory, CrimeRecord } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { crimeCategories } from "../lib/categories";
 import { setState, state } from "../store/api-ui";
 import { courtDisposals } from "../lib/court-disposals";
 import type { GeocodeEventDetail } from "./controls/GeoCode";
-import { crimeRecordToFeature } from "../lib/crime-record-to-feature";
-import { ScatterplotLayer } from "@deck.gl/layers";
 
 function buildOutcomeStrokeExpression(): ExpressionSpecification {
     if (!state.outcomes || !state.outcomes.length) {
@@ -175,13 +175,14 @@ export default function CrimeMap() {
                         ];
                     },
                     pickable: true,
+                    onHover: () => { map.getCanvas().style.cursor = "crosshair" },
+                    autoHighlight: true,
+                    highlightColor: [255, 255, 255, 80],
+
                     onClick: info => {
                         if (!info.object) return;
-
                         const crime = info.object as CrimeRecord;
-
                         popup?.remove();
-
                         popup = new maplibregl.Popup({
                             closeButton: false,
                         })
@@ -190,30 +191,30 @@ export default function CrimeMap() {
                                 crime.lat,
                             ])
                             .setHTML(`
-                        <article class="primary-container no-elevate no-padding">
-                            <table>
-                                <tr>
-                                    <th>Street</th>
-                                    <td>${ crime.streetName }</td>
-                                </tr>
-                                <tr>
-                                    <th>Category</th>
-                                    <td>${ crimeCategories[crime.category].description }</td>
-                                </tr>
-                                <tr>
-                                    <th>Outcome</th>
-                                    <td>${ crime.outcome }</td>
-                                </tr>
-                                <tr>
-                                    <th>Month</th>
-                                    <td>${ crime.month }</td>
-                                </tr>
-                                <tr>
-                                    <th>Context</th>
-                                    <td>${ crime.context || "None provided" }</td>
-                                </tr>
-                            </table>
-                        </article>
+                                <article class="primary-container no-elevate no-padding">
+                                    <table>
+                                        <tr>
+                                            <th>Street</th>
+                                            <td>${ crime.streetName }</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Category</th>
+                                            <td>${ crimeCategories[crime.category].description }</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Outcome</th>
+                                            <td>${ crime.outcome }</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Month</th>
+                                            <td>${ crime.month }</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Context</th>
+                                            <td>${ crime.context || "None provided" }</td>
+                                        </tr>
+                                    </table>
+                                </article>
                     `)
                             .addTo(map!);
                     },
@@ -252,16 +253,14 @@ export default function CrimeMap() {
         map.dragRotate.disable();
         map.touchZoomRotate.disableRotation();
 
-        map.getCanvas().style.cursor = "default";
+        // map.getCanvas().style.cursor = "crosshair";
 
         map.on("load", () => {
             const overlay = new MapboxOverlay({
                 interleaved: true,
                 layers: [],
             });
-
             map.addControl(overlay);
-
             setDeckOverlay(overlay);
 
             // Base maps

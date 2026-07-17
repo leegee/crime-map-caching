@@ -23,4 +23,12 @@
             border-bottom-color: var(--primary-container) !important;
         }
     }
+
+    :global(.maplibregl-canvas) {
+        cursor: crosshair !important;
+    }
+
+    :global(.maplibregl-canvas-container.maplibregl-interactive) {
+        cursor: crosshair !important;
+    }
 }
