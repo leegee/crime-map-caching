@@ -1,6 +1,17 @@
 // https://data.police.uk/api/crime-categories
 
-export const crimeCategories = {
+export type DeckColour = readonly [
+    number,
+    number,
+    number
+];
+
+type CrimeCategoryDefinition = {
+    description: string;
+    colour: DeckColour;
+};
+
+export const crimeCategories: Record<string, CrimeCategoryDefinition> = {
     "anti-social-behaviour": {
         description: "Anti-social behaviour",
         colour: [255, 204, 102],
