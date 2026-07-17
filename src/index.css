@@ -17,3 +17,8 @@
 .maplibregl-map {
   touch-action: none;
 }
+
+.deck-widget-container .fill:not(i) {
+  background: transparent !important;
+  display: none !important;
+}

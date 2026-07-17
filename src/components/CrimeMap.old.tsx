@@ -3,17 +3,15 @@
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import maplibregl, { type ExpressionSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MapboxOverlay } from "@deck.gl/mapbox";
 
 import styles from './CrimeMap.module.scss';
-import type { CrimeCategory, CrimeRecord } from "../lib/types";
+import type { CrimeFeatureCollection, CrimeCategory, CrimeRecord } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { crimeCategories } from "../lib/categories";
 import { setState, state } from "../store/api-ui";
 import { courtDisposals } from "../lib/court-disposals";
 import type { GeocodeEventDetail } from "./controls/GeoCode";
 import { crimeRecordToFeature } from "../lib/crime-record-to-feature";
-import { ScatterplotLayer } from "@deck.gl/layers";
 
 function buildOutcomeStrokeExpression(): ExpressionSpecification {
     if (!state.outcomes || !state.outcomes.length) {
@@ -35,7 +33,6 @@ export default function CrimeMap() {
     let mapContainer: HTMLDivElement | undefined;
     let popup: maplibregl.Popup | null = null;
 
-    const [deckOverlay, setDeckOverlay] = createSignal<MapboxOverlay | undefined>();
     const [mapLoaded, setMapLoaded] = createSignal(false);
     const [crimeRecords, setCrimeRecords] = createSignal<CrimeRecord[]>([]);
 
@@ -78,6 +75,8 @@ export default function CrimeMap() {
     // Re-render on state change - category, date, bounds
     createEffect(async () => {
         if (!state.bounds) return;
+
+        if (popup) popup.remove();
 
         // Filters:
 
@@ -141,43 +140,15 @@ export default function CrimeMap() {
         });
     }
 
-    // createEffect(() => {
-    //     if (!mapLoaded()) return;
-
-    //     const source = map.getSource("crimes") as maplibregl.GeoJSONSource | undefined;
-    //     if (!source) return;
-
-    //     source.setData({
-    //         type: "FeatureCollection",
-    //         features: crimeRecords().map(crimeRecordToFeature),
-    //     });
-    // });
-
     createEffect(() => {
-        const overlay = deckOverlay();
-        if (!overlay) return;
+        if (!mapLoaded()) return;
 
-        overlay.setProps({
-            layers: [
-                new ScatterplotLayer<CrimeRecord>({
-                    id: "crime-points",
-                    data: crimeRecords(),
-                    getPosition: d => [
-                        d.lon,
-                        d.lat,
-                    ],
-                    getRadius: 10,
-                    radiusUnits: "meters",
-                    getFillColor: [
-                        255,
-                        0,
-                        0,
-                        180,
-                    ],
+        const source = map.getSource("crimes") as maplibregl.GeoJSONSource | undefined;
+        if (!source) return;
 
-                    pickable: true,
-                }),
-            ],
+        source.setData({
+            type: "FeatureCollection",
+            features: crimeRecords().map(crimeRecordToFeature),
         });
     });
 
@@ -214,15 +185,6 @@ export default function CrimeMap() {
         map.getCanvas().style.cursor = "default";
 
         map.on("load", () => {
-            const overlay = new MapboxOverlay({
-                interleaved: true,
-                layers: [],
-            });
-
-            map.addControl(overlay);
-
-            setDeckOverlay(overlay);
-
             // Base maps
             map.addSource("basemap-dark", {
                 type: "raster",
@@ -301,6 +263,68 @@ export default function CrimeMap() {
                 });
             }
 
+            map.addSource("crimes", {
+                type: "geojson",
+                data: {
+                    type: "FeatureCollection",
+                    features: [],
+                },
+            });
+
+            // One layer per category
+            for (const [category, { colour }] of Object.entries(crimeCategories)) {
+                map.addLayer({
+                    id: `crime-${ category }`,
+                    type: "circle",
+                    source: "crimes",
+                    filter: ["==", ["get", "category"], category],
+                    paint: {
+                        "circle-radius": 10,
+                        "circle-color": colour,
+                        "circle-stroke-color": buildOutcomeStrokeExpression(),
+                        "circle-stroke-width": 5,
+                    },
+                    layout: {
+                        visibility: state.categories?.includes(category as CrimeCategory) ? "visible" : "none",
+                    },
+                });
+
+                map.on("mouseenter", `crime-${ category }`, () => map.getCanvas().style.cursor = "pointer");
+                map.on("mouseleave", `crime-${ category }`, () => map.getCanvas().style.cursor = "default");
+
+                map.on("click", `crime-${ category }`, (e) => {
+                    const feature = e.features![0];
+                    const coordinates = (feature.geometry as GeoJSON.Point).coordinates;
+                    popup = new maplibregl.Popup({
+                        closeOnClick: true,
+                        closeButton: false,
+                    })
+                        .setLngLat(coordinates as [number, number])
+                        .setHTML(`
+                            <article class="primary-container no-elevate no-padding">
+                                <table>
+                                        <tr>
+                                            <th>Street</th>
+                                            <td>${ feature.properties.streetName }</td>
+                                        </tr><tr>
+                                            <th>Category</th>
+                                            <td>${ crimeCategories[feature.properties.category as CrimeCategory].description }</td>
+                                        </tr><tr>
+                                            <th>Outcome</th>
+                                            <td>${ feature.properties.outcome }</td>
+                                        </tr><tr>
+                                            <th>Month</th>
+                                            <td>${ feature.properties.month }</td>
+                                        </tr><tr>
+                                            <th>Context</th>
+                                            <td>${ feature.properties.context || 'None provided' }</td>
+                                        </tr>
+                                    </table>
+                                </article>`
+                        ).addTo(map);
+                });
+            }
+
             setState("bounds", map.getBounds());
             setMapLoaded(true);
         });
@@ -310,4 +334,3 @@ export default function CrimeMap() {
 
     return <div ref={mapContainer} class={styles["map-container"] + " " + styles[state.baseLayer]} ></div>
 }
-
