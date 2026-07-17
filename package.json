@@ -22,9 +22,13 @@
     "generate-icons": "pwa-asset-generator src/assets/logo.png public/icons --background '#000000'"
   },
   "dependencies": {
+    "@deck.gl/core": "^9.3.7",
+    "@deck.gl/layers": "^9.3.7",
+    "@deck.gl/mapbox": "^9.3.7",
     "@types/maplibre-gl": "^1.14.0",
     "beercss": "^3.11.33",
     "debounce": "^2.2.0",
+    "deck.gl": "^9.3.7",
     "idb": "^8.0.3",
     "maplibre-gl": "^5.7.0",
     "p-limit": "^7.1.1",

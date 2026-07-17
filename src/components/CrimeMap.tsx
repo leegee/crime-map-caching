@@ -5,7 +5,7 @@ import maplibregl, { type ExpressionSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import styles from './CrimeMap.module.scss';
-import type { CrimeFeatureCollection, CrimeFeature, CrimeCategory, CrimeRecord } from "../lib/types";
+import type { CrimeFeatureCollection, CrimeCategory, CrimeRecord } from "../lib/types";
 import { fetchDataForViewport } from "../lib/fetch";
 import { crimeCategories } from "../lib/categories";
 import { setState, state } from "../store/api-ui";
@@ -34,11 +34,7 @@ export default function CrimeMap() {
     let popup: maplibregl.Popup | null = null;
 
     const [mapLoaded, setMapLoaded] = createSignal(false);
-
-    const crimeGeoJSON: CrimeFeatureCollection = {
-        type: "FeatureCollection",
-        features: [],
-    };
+    const [crimeRecords, setCrimeRecords] = createSignal<CrimeRecord[]>([]);
 
     let map: maplibregl.Map;
 
@@ -85,17 +81,16 @@ export default function CrimeMap() {
         // Filters:
 
         // Remove features whose categories are no longer selected
-        crimeGeoJSON.features = crimeGeoJSON.features.filter(f =>
-            state.categories?.includes(f.properties?.category)
+        setCrimeRecords(records =>
+            records.filter(record => state.categories?.includes(record.category))
         );
 
         if (state.outcomes?.length) {
-            crimeGeoJSON.features = crimeGeoJSON.features.filter(f =>
-                state.outcomes.includes(f.properties?.outcome)
+            setCrimeRecords(records =>
+                records.filter(record => state.outcomes.includes(record.outcomeKey))
             );
         }
 
-        renderGeoJson();
 
         const tilesToFetchPromises: Promise<void>[] = [];
 
@@ -109,73 +104,31 @@ export default function CrimeMap() {
             const shouldClear = lastDateKey !== dateKey;
 
             if (shouldClear) {
-                // Remove old features of this category for new month
-                crimeGeoJSON.features = crimeGeoJSON.features.filter(f => f.properties?.category !== category);
+                setCrimeRecords(records =>
+                    records.filter(record => record.category !== category)
+                );
+
                 lastQuery[category] = dateKey;
             }
 
             // Fetch tiles for this category
             tilesToFetchPromises.push(
                 fetchDataForViewport(state.bounds, state.date, category, (newCrimes: CrimeRecord[]) => {
-                    // const newFeatures: CrimeFeature[] = newCrimes.map((crime) => {
-                    //     const outcomeDesc = crime.outcome_status?.category;
-                    //     const outcomeKey = outcomeDesc ? outcomeDescriptionToKey[outcomeDesc] : "unknown";
-
-                    //     return {
-                    //         type: "Feature",
-                    //         geometry: {
-                    //             type: "Point",
-                    //             coordinates: [
-                    //                 parseFloat(crime.location.longitude),
-                    //                 parseFloat(crime.location.latitude),
-                    //             ],
-                    //         },
-                    //         properties: {
-                    //             category: crime.category,
-                    //             outcome: outcomeDesc || "Unknown",   // human-readable
-                    //             outcomeKey,                          // stable key
-                    //             month: crime.month,
-                    //             streetName: crime.location.street.name,
-                    //             context: crime.context,
-                    //         },
-                    //     };
-                    // });
-
-                    const newFeatures: CrimeFeature[] = newCrimes.map(crimeRecordToFeature);
-
                     const filtered = state.outcomes?.length
-                        ? newFeatures.filter(f => f.properties?.outcomeKey && state.outcomes.includes(f.properties.outcomeKey))
-                        : newFeatures;
+                        ? newCrimes.filter(crime => state.outcomes.includes(crime.outcomeKey))
+                        : newCrimes;
 
-                    crimeGeoJSON.features.push(...filtered);
-                    renderGeoJson();
+                    setCrimeRecords(existing => [
+                        ...existing,
+                        ...filtered,
+                    ]);
                 })
             );
-
         }
 
         await Promise.all(tilesToFetchPromises).catch(err => console.error(err));
-
-        renderGeoJson();
-
         setState("loading", false);
     });
-
-    function renderGeoJson() {
-        if (!map) return;
-
-        if (map.getSource("crimes")) {
-            (map.getSource("crimes") as maplibregl.GeoJSONSource).setData(crimeGeoJSON);
-
-            // Toggle visibility for each category layer
-            for (const category of Object.keys(crimeCategories) as CrimeCategory[]) {
-                const visible = state.categories?.includes(category) ? "visible" : "none";
-                if (map.getLayer(`crime-${ category }`)) {
-                    map.setLayoutProperty(`crime-${ category }`, "visibility", visible);
-                }
-            }
-        }
-    }
 
     function handleGeocodeEvent(e: CustomEvent<GeocodeEventDetail>) {
         console.log("handleGeocodeEvent", e.detail);
@@ -186,6 +139,18 @@ export default function CrimeMap() {
             curve: 1.42,
         });
     }
+
+    createEffect(() => {
+        if (!mapLoaded()) return;
+
+        const source = map.getSource("crimes") as maplibregl.GeoJSONSource | undefined;
+        if (!source) return;
+
+        source.setData({
+            type: "FeatureCollection",
+            features: crimeRecords().map(crimeRecordToFeature),
+        });
+    });
 
     onCleanup(() => {
         window.removeEventListener("geocode", handleGeocodeEvent as EventListener);
@@ -298,10 +263,12 @@ export default function CrimeMap() {
                 });
             }
 
-            // Crimes source
             map.addSource("crimes", {
                 type: "geojson",
-                data: crimeGeoJSON,
+                data: {
+                    type: "FeatureCollection",
+                    features: [],
+                },
             });
 
             // One layer per category

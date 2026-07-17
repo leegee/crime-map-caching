@@ -41,6 +41,8 @@ async function fetchData(
     console.log("Fetching crimes from URL:", url);
 
     const res = await fetch(url, { signal });
+
+
     if (!res.ok) throw new Error(`HTTP error - status: ${ res.status }`);
 
     const crimes: Crime[] = await res.json();
