@@ -8,13 +8,14 @@
 
 import pLimit from "p-limit";
 import { TileCache } from "./TileCache";
-import type { Crime } from "./types";
+import type { CrimeRecord } from "./types";
+import { flattenCrime } from "./flatten-crime";
 import { retry } from "./retry";
 import { formatDateForUrl } from "./format-date";
 
 const ongoingTileRequests = new Map<string, AbortController>();
 
-type CrimeCallback = (crimes: Crime[]) => void;
+type TileDataCallback = (records: CrimeRecord[]) => void;
 
 const RETRIES = 3;
 const RETRY_DELAY_MS = 500;
@@ -46,7 +47,7 @@ async function fetchData(
     return crimes;
 }
 
-const tileCache = new TileCache<Crime[]>({
+const tileCache = new TileCache<CrimeRecord[]>({
     minLon: -180,
     minLat: -90,
     tileHeight: 0.072,
@@ -118,7 +119,8 @@ export async function fetchDataForViewport(
                 );
 
                 if (crimes.length && onTileData) {
-                    await tileCache.storeTile(category, dateKey, tileX, tileY, crimes);
+                    const records = crimes.map(flattenCrime);
+                    await tileCache.storeTile(category, dateKey, tileX, tileY, records);
                     onTileData(crimes);
                 }
             } catch (err) {

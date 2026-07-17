@@ -11,7 +11,7 @@ export type CrimeOutcome = typeof CRIME_OUTCOMES[number];
 
 export type Crime = {
     id: string;
-    category: string;
+    category: string; // CrimeCategory ?
     outcome_status?: { category: string };
     location: {
         latitude: string;
@@ -24,6 +24,20 @@ export type Crime = {
     context: string;
     month: string;
 };
+
+
+export type CrimeRecord = {
+    id: string;
+    lon: number;
+    lat: number;
+    category: CrimeCategory;
+    outcome: string;
+    outcomeKey: CrimeOutcome | "unknown";
+    streetName: string;
+    context: string;
+    month: string;
+};
+
 
 export type CrimeFeature = Feature<Point, GeoJsonProperties>;
 
